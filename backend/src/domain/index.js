@@ -1,10 +1,9 @@
 const enums = require("./enums");
-
-const SimulationConstants = require("./constants/SimulationConstants");
-const MilitaryConstants = require("./constants/MilitaryConstants");
+const constants = require("./constants");
+const entities = require("./entities");
 
 module.exports = {
     enums,
-    SimulationConstants,
-    MilitaryConstants
+    constants,
+    entities
 };
