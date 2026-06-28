@@ -5,11 +5,8 @@ class SimulationController {
     static runSampleSimulation(req, res) {
         try {
             const simulationService = new SimulationService();
-
             const sampleInput = createSampleScenario();
-
-            const result =
-                simulationService.runSimulation(sampleInput);
+            const result = simulationService.runSimulation(sampleInput);
 
             return res.status(200).json({
                 success: true,
@@ -20,6 +17,35 @@ class SimulationController {
             return res.status(500).json({
                 success: false,
                 message: "Simulation failed.",
+                error: error.message
+            });
+        }
+    }
+
+    static runSampleSimulationSummary(req, res) {
+        try {
+            const simulationService = new SimulationService();
+            const sampleInput = createSampleScenario();
+            const result = simulationService.runSimulation(sampleInput);
+
+            return res.status(200).json({
+                success: true,
+                message: "Simulation summary generated successfully.",
+                data: {
+                    scenarioName: result.scenario.name,
+                    totalMissions: result.statistics.totalMissions,
+                    completedSorties: result.statistics.completedSorties,
+                    abortedMissions: result.statistics.abortedMissions,
+                    groundAborts: result.statistics.groundAborts,
+                    airAborts: result.statistics.airAborts,
+                    weatherAborts: result.statistics.weatherAborts,
+                    successRate: result.statistics.successRate
+                }
+            });
+        } catch (error) {
+            return res.status(500).json({
+                success: false,
+                message: "Simulation summary failed.",
                 error: error.message
             });
         }
