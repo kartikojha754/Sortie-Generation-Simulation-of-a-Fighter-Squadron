@@ -9,32 +9,43 @@ import {
 import SectionHeader from "../common/SectionHeader";
 import StatCard from "../common/StatCard";
 
-function ResultSummary() {
+function ResultSummary({ result }) {
+  const statistics = result?.statistics;
+
+  const totalMissions = statistics?.totalMissions ?? "—";
+  const completedSorties = statistics?.completedSorties ?? "—";
+  const abortedMissions = statistics?.abortedMissions ?? "—";
+
+  const successRate =
+    statistics?.successRate !== undefined
+      ? `${Math.round(statistics.successRate * 100)}%`
+      : "—";
+
   const stats = [
     {
       title: "Total Missions",
-      value: "10",
+      value: totalMissions,
       subtitle: "Scheduled sorties",
       icon: <MdAirplanemodeActive />,
       tone: "primary",
     },
     {
       title: "Mission Success",
-      value: "5",
+      value: completedSorties,
       subtitle: "Successfully completed",
       icon: <MdCheckCircle />,
       tone: "success",
     },
     {
       title: "Mission Aborts",
-      value: "5",
-      subtitle: "Ground / Air / Weather",
+      value: abortedMissions,
+      subtitle: "Ground / Air / Weather / Resource",
       icon: <MdCancel />,
       tone: "danger",
     },
     {
       title: "Success Rate",
-      value: "50%",
+      value: successRate,
       subtitle: "Overall efficiency",
       icon: <MdTrendingUp />,
       tone: "warning",

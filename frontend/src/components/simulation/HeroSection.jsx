@@ -9,7 +9,7 @@ import {
 import Button from "../common/Button";
 import Card from "../common/Card";
 
-function HeroSection() {
+function HeroSection({ onRunSimulation, isLoading = false }) {
   return (
     <section className="grid gap-6 rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 p-8 shadow-2xl shadow-black/30 lg:grid-cols-[1.6fr_1fr]">
       <div>
@@ -27,8 +27,13 @@ function HeroSection() {
         </p>
 
         <div className="mt-7 flex flex-wrap gap-3">
-          <Button size="lg" icon={<MdPlayArrow />}>
-            Run Simulation
+          <Button
+            size="lg"
+            icon={<MdPlayArrow />}
+            onClick={onRunSimulation}
+            disabled={isLoading}
+          >
+            {isLoading ? "Running..." : "Run Simulation"}
           </Button>
 
           <Button variant="secondary" size="lg" icon={<MdTune />}>
@@ -43,7 +48,9 @@ function HeroSection() {
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-sky-400">
               System Status
             </p>
-            <h3 className="mt-1 text-xl font-bold text-white">Engine Ready</h3>
+            <h3 className="mt-1 text-xl font-bold text-white">
+              {isLoading ? "Simulation Running" : "Engine Ready"}
+            </h3>
           </div>
 
           <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-2xl text-emerald-400">
@@ -55,7 +62,7 @@ function HeroSection() {
           <StatusRow
             icon={<MdMemory />}
             label="Simulation Engine"
-            value="Online"
+            value={isLoading ? "Running" : "Online"}
             tone="success"
           />
 
