@@ -8,7 +8,6 @@ import {
 } from "react-icons/md";
 
 import Card from "../common/Card";
-import SectionHeader from "../common/SectionHeader";
 
 function SquadronResources({ result }) {
   const scenario = result?.scenario;
@@ -54,14 +53,7 @@ function SquadronResources({ result }) {
   ];
 
   return (
-    <section className="space-y-6">
-      <SectionHeader
-        eyebrow="Squadron"
-        title="Squadron Resources"
-        subtitle="Operational assets available for sortie generation and mission execution."
-        icon={<MdMilitaryTech />}
-      />
-
+    <div className="h-full">
       <Card>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           {resources.map((resource) => (
@@ -76,7 +68,7 @@ function SquadronResources({ result }) {
           ))}
         </div>
       </Card>
-    </section>
+    </div>
   );
 }
 

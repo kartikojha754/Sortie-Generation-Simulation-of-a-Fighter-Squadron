@@ -2,8 +2,7 @@ import { useState } from "react";
 
 import HeroSection from "../components/simulation/HeroSection";
 import ResultSummary from "../components/simulation/ResultSummary";
-import ScenarioOverview from "../components/simulation/ScenarioOverview";
-import SquadronResources from "../components/simulation/SquadronResources";
+import OperationsOverview from "../components/simulation/OperationsOverview";
 
 import { runCustomSimulation } from "../api/simulationApi";
 
@@ -59,8 +58,7 @@ function Simulation() {
       )}
 
       <ResultSummary result={simulationResult} />
-      <ScenarioOverview result={simulationResult} />
-      <SquadronResources result={simulationResult} />
+      <OperationsOverview result={simulationResult} />
     </div>
   );
 }
