@@ -3,7 +3,6 @@ import {
   MdPerson,
   MdEngineering,
   MdFlightTakeoff,
-  MdMilitaryTech,
   MdAssignment,
 } from "react-icons/md";
 
@@ -53,26 +52,36 @@ function SquadronResources({ result }) {
   ];
 
   return (
-    <div className="h-full">
-      <Card>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-          {resources.map((resource) => (
-            <ResourceItem
-              key={resource.label}
-              label={resource.label}
-              value={resource.value}
-              subtitle={resource.subtitle}
-              icon={resource.icon}
-              tone={resource.tone}
-            />
-          ))}
-        </div>
-      </Card>
-    </div>
+    <Card className="h-full">
+      <div className="mb-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-sky-400">
+          Squadron
+        </p>
+        <h3 className="mt-1 text-xl font-bold text-white">
+          Squadron Resources
+        </h3>
+        <p className="mt-1 text-sm text-slate-400">
+          Assets available for sortie generation.
+        </p>
+      </div>
+
+      <div className="space-y-3">
+        {resources.map((resource) => (
+          <ResourceRow
+            key={resource.label}
+            label={resource.label}
+            value={resource.value}
+            subtitle={resource.subtitle}
+            icon={resource.icon}
+            tone={resource.tone}
+          />
+        ))}
+      </div>
+    </Card>
   );
 }
 
-function ResourceItem({ label, value, subtitle, icon, tone }) {
+function ResourceRow({ label, value, subtitle, icon, tone }) {
   const tones = {
     primary: "text-sky-400 bg-sky-500/10 border-sky-500/30",
     success: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
@@ -81,22 +90,23 @@ function ResourceItem({ label, value, subtitle, icon, tone }) {
   };
 
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 transition hover:-translate-y-1 hover:border-slate-700">
-      <div
-        className={`mb-5 flex h-11 w-11 items-center justify-center rounded-xl border text-xl ${
-          tones[tone] || tones.primary
-        }`}
-      >
-        {icon}
+    <div className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950/60 px-4 py-3 transition hover:border-slate-700">
+      <div className="flex items-center gap-3">
+        <div
+          className={`flex h-10 w-10 items-center justify-center rounded-xl border text-lg ${
+            tones[tone] || tones.primary
+          }`}
+        >
+          {icon}
+        </div>
+
+        <div>
+          <p className="text-sm font-medium text-slate-300">{label}</p>
+          <p className="text-xs text-slate-500">{subtitle}</p>
+        </div>
       </div>
 
-      <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">
-        {label}
-      </p>
-
-      <p className="mt-2 text-3xl font-bold text-white">{value}</p>
-
-      <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
+      <p className="text-2xl font-bold text-white">{value}</p>
     </div>
   );
 }

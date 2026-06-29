@@ -3,22 +3,20 @@ import {
   MdTimer,
   MdRule,
   MdShuffle,
-  MdSettings,
   MdWarning,
+  MdFlight,
 } from "react-icons/md";
 
 import Card from "../common/Card";
 
 function ScenarioOverview({ result }) {
   const scenario = result?.scenario;
+  const weather = result?.finalSquadronState?.weather;
 
   const scenarioItems = [
     {
       label: "Weather",
-      value:
-        scenario?.weatherCondition ||
-        result?.finalSquadronState?.weather?.condition ||
-        "—",
+      value: weather?.condition || "—",
       icon: <MdCloud />,
       tone: "primary",
     },
@@ -37,7 +35,7 @@ function ScenarioOverview({ result }) {
         scenario?.airAbortRate !== undefined
           ? `${scenario.airAbortRate * 100}%`
           : "—",
-      icon: <MdWarning />,
+      icon: <MdFlight />,
       tone: "warning",
     },
     {
@@ -83,25 +81,35 @@ function ScenarioOverview({ result }) {
   ];
 
   return (
-    <div className="h-full">
-      <Card>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {scenarioItems.map((item) => (
-            <ScenarioItem
-              key={item.label}
-              label={item.label}
-              value={item.value}
-              icon={item.icon}
-              tone={item.tone}
-            />
-          ))}
-        </div>
-      </Card>
-    </div>
+    <Card className="h-full">
+      <div className="mb-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-sky-400">
+          Scenario
+        </p>
+        <h3 className="mt-1 text-xl font-bold text-white">
+          Scenario Configuration
+        </h3>
+        <p className="mt-1 text-sm text-slate-400">
+          Active rules and environmental settings.
+        </p>
+      </div>
+
+      <div className="space-y-3">
+        {scenarioItems.map((item) => (
+          <ScenarioRow
+            key={item.label}
+            label={item.label}
+            value={item.value}
+            icon={item.icon}
+            tone={item.tone}
+          />
+        ))}
+      </div>
+    </Card>
   );
 }
 
-function ScenarioItem({ label, value, icon, tone }) {
+function ScenarioRow({ label, value, icon, tone }) {
   const tones = {
     primary: "text-sky-400 bg-sky-500/10 border-sky-500/30",
     success: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
@@ -110,22 +118,20 @@ function ScenarioItem({ label, value, icon, tone }) {
   };
 
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 transition hover:border-slate-700">
-      <div className="mb-4 flex items-center justify-between">
+    <div className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950/60 px-4 py-3 transition hover:border-slate-700">
+      <div className="flex items-center gap-3">
         <div
-          className={`flex h-10 w-10 items-center justify-center rounded-xl border text-xl ${
+          className={`flex h-10 w-10 items-center justify-center rounded-xl border text-lg ${
             tones[tone] || tones.primary
           }`}
         >
           {icon}
         </div>
+
+        <p className="text-sm font-medium text-slate-300">{label}</p>
       </div>
 
-      <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">
-        {label}
-      </p>
-
-      <p className="mt-2 text-lg font-semibold text-white">{value}</p>
+      <p className="text-sm font-semibold text-white">{value}</p>
     </div>
   );
 }
