@@ -10,39 +10,43 @@ import {
 import Card from "../common/Card";
 import SectionHeader from "../common/SectionHeader";
 
-function SquadronResources() {
+function SquadronResources({ result }) {
+  const scenario = result?.scenario;
+  const squadron = result?.finalSquadronState;
+
   const resources = [
     {
       label: "Aircraft",
-      value: "8",
+      value: squadron?.aircraft?.length ?? scenario?.availableAircraft ?? "—",
       subtitle: "F-16C assets",
       icon: <MdAirplanemodeActive />,
       tone: "primary",
     },
     {
       label: "Pilots",
-      value: "8",
-      subtitle: "Combat-ready crew",
+      value: squadron?.pilots?.length ?? scenario?.availablePilots ?? "—",
+      subtitle: "Flight crew",
       icon: <MdPerson />,
       tone: "success",
     },
     {
       label: "Ground Crew",
-      value: "5",
+      value:
+        squadron?.groundCrew?.length ?? scenario?.availableGroundCrew ?? "—",
       subtitle: "Maintenance support",
       icon: <MdEngineering />,
       tone: "warning",
     },
     {
       label: "Runways",
-      value: "2",
+      value: squadron?.runways?.length ?? scenario?.availableRunways ?? "—",
       subtitle: "Available launch paths",
       icon: <MdFlightTakeoff />,
       tone: "primary",
     },
     {
       label: "Mission Count",
-      value: "10",
+      value: result?.missions?.length ?? "—",
       subtitle: "Planned missions",
       icon: <MdAssignment />,
       tone: "success",

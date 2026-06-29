@@ -10,47 +10,74 @@ import {
 import Card from "../common/Card";
 import SectionHeader from "../common/SectionHeader";
 
-function ScenarioOverview() {
+function ScenarioOverview({ result }) {
+  const scenario = result?.scenario;
+
   const scenarioItems = [
     {
       label: "Weather",
-      value: "CLEAR",
+      value:
+        scenario?.weatherCondition ||
+        result?.finalSquadronState?.weather?.condition ||
+        "—",
       icon: <MdCloud />,
       tone: "primary",
     },
     {
       label: "Ground Abort Rate",
-      value: "5%",
+      value:
+        scenario?.groundAbortRate !== undefined
+          ? `${scenario.groundAbortRate * 100}%`
+          : "—",
       icon: <MdWarning />,
       tone: "danger",
     },
     {
       label: "Air Abort Rate",
-      value: "3%",
+      value:
+        scenario?.airAbortRate !== undefined
+          ? `${scenario.airAbortRate * 100}%`
+          : "—",
       icon: <MdWarning />,
       tone: "warning",
     },
     {
       label: "Weather Abort Rate",
-      value: "2%",
+      value:
+        scenario?.weatherAbortRate !== undefined
+          ? `${scenario.weatherAbortRate * 100}%`
+          : "—",
       icon: <MdCloud />,
       tone: "primary",
     },
     {
       label: "Mission Planning",
-      value: "Enabled",
+      value:
+        scenario?.missionPlanningEnabled !== undefined
+          ? scenario.missionPlanningEnabled
+            ? "Enabled"
+            : "Disabled"
+          : "—",
       icon: <MdRule />,
       tone: "success",
     },
     {
       label: "Random Scheduling",
-      value: "Disabled",
+      value:
+        scenario?.randomScheduling !== undefined
+          ? scenario.randomScheduling
+            ? "Enabled"
+            : "Disabled"
+          : "—",
       icon: <MdShuffle />,
       tone: "warning",
     },
     {
       label: "Simulation Duration",
-      value: "1440 min",
+      value:
+        scenario?.simulationDuration !== undefined
+          ? `${scenario.simulationDuration} min`
+          : "—",
       icon: <MdTimer />,
       tone: "primary",
     },
