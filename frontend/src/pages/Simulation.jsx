@@ -4,6 +4,7 @@ import HeroSection from "../components/simulation/HeroSection";
 import ResultSummary from "../components/simulation/ResultSummary";
 import OperationsOverview from "../components/simulation/OperationsOverview";
 import MissionTable from "../components/simulation/MissionTable";
+import AnalyticsSection from "../components/simulation/AnalyticsSection";
 
 import { runCustomSimulation } from "../api/simulationApi";
 
@@ -61,6 +62,7 @@ function Simulation() {
       <ResultSummary result={simulationResult} />
       <OperationsOverview result={simulationResult} />
       <MissionTable result={simulationResult} />
+      <AnalyticsSection result={simulationResult} />
     </div>
   );
 }
