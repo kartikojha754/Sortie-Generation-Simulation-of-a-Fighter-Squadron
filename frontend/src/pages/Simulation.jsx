@@ -3,6 +3,7 @@ import { useState } from "react";
 import HeroSection from "../components/simulation/HeroSection";
 import ResultSummary from "../components/simulation/ResultSummary";
 import OperationsOverview from "../components/simulation/OperationsOverview";
+import MissionTable from "../components/simulation/MissionTable";
 
 import { runCustomSimulation } from "../api/simulationApi";
 
@@ -59,6 +60,7 @@ function Simulation() {
 
       <ResultSummary result={simulationResult} />
       <OperationsOverview result={simulationResult} />
+      <MissionTable result={simulationResult} />
     </div>
   );
 }

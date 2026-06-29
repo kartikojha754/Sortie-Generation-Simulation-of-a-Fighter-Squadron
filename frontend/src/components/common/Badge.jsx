@@ -1,4 +1,4 @@
-function Badge({ children, variant = "neutral", size = "md" }) {
+function Badge({ children, variant = "neutral", size = "md", icon }) {
   const variants = {
     success: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
     danger: "border-red-500/30 bg-red-500/10 text-red-400",
@@ -18,6 +18,7 @@ function Badge({ children, variant = "neutral", size = "md" }) {
       className={`
         inline-flex
         items-center
+        gap-2
         rounded-full
         border
         font-semibold
@@ -27,6 +28,7 @@ function Badge({ children, variant = "neutral", size = "md" }) {
         ${sizes[size] || sizes.md}
       `}
     >
+      {icon && <span className="text-sm">{icon}</span>}
       {children}
     </span>
   );
