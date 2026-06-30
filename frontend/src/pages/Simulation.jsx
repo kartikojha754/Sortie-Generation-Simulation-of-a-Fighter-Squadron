@@ -5,10 +5,11 @@ import ResultSummary from "../components/simulation/ResultSummary";
 import OperationsOverview from "../components/simulation/OperationsOverview";
 import MissionTable from "../components/simulation/MissionTable";
 import AnalyticsSection from "../components/simulation/AnalyticsSection";
+import ScenarioBuilderPanel from "../components/simulation/ScenarioBuilderPanel";
 
 import { runCustomSimulation } from "../api/simulationApi";
 
-const DEFAULT_SIMULATION_INPUT = {
+const INITIAL_FORM_DATA = {
   aircraftCount: 8,
   pilotCount: 8,
   groundCrewCount: 5,
@@ -24,16 +25,31 @@ const DEFAULT_SIMULATION_INPUT = {
 };
 
 function Simulation() {
+  const [formData, setFormData] = useState(INITIAL_FORM_DATA);
   const [simulationResult, setSimulationResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  function handleInputChange(event) {
+    const { name, value, checked, type } = event.target;
+
+    setFormData((current) => ({
+      ...current,
+      [name]:
+        type === "checkbox"
+          ? checked
+          : type === "number"
+            ? Number(value)
+            : value,
+    }));
+  }
 
   async function handleRunSimulation() {
     try {
       setIsLoading(true);
       setErrorMessage("");
 
-      const response = await runCustomSimulation(DEFAULT_SIMULATION_INPUT);
+      const response = await runCustomSimulation(formData);
 
       setSimulationResult(response.data);
     } catch (error) {
@@ -58,6 +74,13 @@ function Simulation() {
           {errorMessage}
         </div>
       )}
+
+      <ScenarioBuilderPanel
+        formData={formData}
+        onChange={handleInputChange}
+        onRunSimulation={handleRunSimulation}
+        isLoading={isLoading}
+      />
 
       <ResultSummary result={simulationResult} />
       <OperationsOverview result={simulationResult} />
