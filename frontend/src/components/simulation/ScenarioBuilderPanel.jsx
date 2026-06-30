@@ -21,7 +21,11 @@ function ScenarioBuilderPanel({
   ];
 
   return (
-    <Card className="space-y-6">
+    <Card
+      className={`space-y-6 transition-opacity ${
+        isLoading ? "pointer-events-none opacity-60" : ""
+      }`}
+    >
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.25em] text-sky-400">
           Builder

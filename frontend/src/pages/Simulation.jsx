@@ -6,6 +6,7 @@ import OperationsOverview from "../components/simulation/OperationsOverview";
 import MissionTable from "../components/simulation/MissionTable";
 import AnalyticsSection from "../components/simulation/AnalyticsSection";
 import ScenarioBuilderPanel from "../components/simulation/ScenarioBuilderPanel";
+import LoadingOverlay from "../components/common/LoadingOverlay";
 
 import { runCustomSimulation } from "../api/simulationApi";
 
@@ -101,6 +102,12 @@ function Simulation() {
 
   return (
     <div className="space-y-12">
+      <LoadingOverlay
+        isVisible={isLoading}
+        title="Running Simulation"
+        message="Generating missions, assigning resources, executing events, and calculating results..."
+      />
+
       <HeroSection
         onRunSimulation={handleRunSimulation}
         isLoading={isLoading}
