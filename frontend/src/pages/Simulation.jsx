@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
+import { MdRocketLaunch } from "react-icons/md";
 
 import LoadingOverlay from "../components/common/LoadingOverlay";
 import AnimatedSection from "../components/common/AnimatedSection";
 import Toast from "../components/common/Toast";
 import FormError from "../components/common/FormError";
+import EmptyState from "../components/common/EmptyState";
 
 import HeroSection from "../components/simulation/HeroSection";
 import ResultSummary from "../components/simulation/ResultSummary";
@@ -43,10 +45,7 @@ function Simulation() {
   const resultsRef = useRef(null);
 
   function showToast(message, type = "info") {
-    setToast({
-      message,
-      type,
-    });
+    setToast({ message, type });
   }
 
   function clearToast() {
@@ -187,22 +186,34 @@ function Simulation() {
       <FormError message={errorMessage} />
 
       <div ref={resultsRef}>
-        <AnimatedSection delay={0.1}>
-          <ResultSummary result={simulationResult} />
-        </AnimatedSection>
+        {simulationResult ? (
+          <>
+            <AnimatedSection delay={0.1}>
+              <ResultSummary result={simulationResult} />
+            </AnimatedSection>
+
+            <AnimatedSection delay={0.15}>
+              <OperationsOverview result={simulationResult} />
+            </AnimatedSection>
+
+            <AnimatedSection delay={0.2}>
+              <MissionTable result={simulationResult} />
+            </AnimatedSection>
+
+            <AnimatedSection delay={0.25}>
+              <AnalyticsSection result={simulationResult} />
+            </AnimatedSection>
+          </>
+        ) : (
+          <AnimatedSection delay={0.1}>
+            <EmptyState
+              title="Ready to simulate"
+              message="Configure your scenario above and run the simulation to generate mission results, operational insights, and analytics."
+              icon={<MdRocketLaunch />}
+            />
+          </AnimatedSection>
+        )}
       </div>
-
-      <AnimatedSection delay={0.15}>
-        <OperationsOverview result={simulationResult} />
-      </AnimatedSection>
-
-      <AnimatedSection delay={0.2}>
-        <MissionTable result={simulationResult} />
-      </AnimatedSection>
-
-      <AnimatedSection delay={0.25}>
-        <AnalyticsSection result={simulationResult} />
-      </AnimatedSection>
     </div>
   );
 }
