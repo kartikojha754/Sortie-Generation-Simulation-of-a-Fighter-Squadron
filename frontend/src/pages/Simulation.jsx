@@ -1,4 +1,9 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+import LoadingOverlay from "../components/common/LoadingOverlay";
+import AnimatedSection from "../components/common/AnimatedSection";
+import Toast from "../components/common/Toast";
+import FormError from "../components/common/FormError";
 
 import HeroSection from "../components/simulation/HeroSection";
 import ResultSummary from "../components/simulation/ResultSummary";
@@ -6,7 +11,6 @@ import OperationsOverview from "../components/simulation/OperationsOverview";
 import MissionTable from "../components/simulation/MissionTable";
 import AnalyticsSection from "../components/simulation/AnalyticsSection";
 import ScenarioBuilderPanel from "../components/simulation/ScenarioBuilderPanel";
-import LoadingOverlay from "../components/common/LoadingOverlay";
 
 import { runCustomSimulation } from "../api/simulationApi";
 
@@ -29,7 +33,38 @@ function Simulation() {
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
   const [simulationResult, setSimulationResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+
   const [errorMessage, setErrorMessage] = useState("");
+  const [toast, setToast] = useState({
+    message: "",
+    type: "info",
+  });
+
+  const resultsRef = useRef(null);
+
+  function showToast(message, type = "info") {
+    setToast({
+      message,
+      type,
+    });
+  }
+
+  function clearToast() {
+    setToast({
+      message: "",
+      type: "info",
+    });
+  }
+
+  useEffect(() => {
+    if (!toast.message) return;
+
+    const timer = setTimeout(() => {
+      clearToast();
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [toast.message]);
 
   function handleInputChange(event) {
     const { name, value, checked, type } = event.target;
@@ -48,17 +83,33 @@ function Simulation() {
   function handleResetDefaults() {
     setFormData(INITIAL_FORM_DATA);
     setErrorMessage("");
+    showToast("Scenario reset to default configuration.", "info");
   }
 
   function validateForm() {
-    if (formData.aircraftCount < 1) return "Aircraft count must be at least 1.";
-    if (formData.pilotCount < 1) return "Pilot count must be at least 1.";
-    if (formData.groundCrewCount < 1)
+    if (formData.aircraftCount < 1) {
+      return "Aircraft count must be at least 1.";
+    }
+
+    if (formData.pilotCount < 1) {
+      return "Pilot count must be at least 1.";
+    }
+
+    if (formData.groundCrewCount < 1) {
       return "Ground crew count must be at least 1.";
-    if (formData.runwayCount < 1) return "Runway count must be at least 1.";
-    if (formData.missionCount < 1) return "Mission count must be at least 1.";
-    if (formData.simulationDuration < 60)
+    }
+
+    if (formData.runwayCount < 1) {
+      return "Runway count must be at least 1.";
+    }
+
+    if (formData.missionCount < 1) {
+      return "Mission count must be at least 1.";
+    }
+
+    if (formData.simulationDuration < 60) {
       return "Simulation duration must be at least 60 minutes.";
+    }
 
     const abortRates = [
       formData.groundAbortRate,
@@ -80,21 +131,33 @@ function Simulation() {
 
     if (validationError) {
       setErrorMessage(validationError);
+      showToast(validationError, "error");
       return;
     }
 
     try {
       setIsLoading(true);
       setErrorMessage("");
+      clearToast();
 
       const response = await runCustomSimulation(formData);
 
       setSimulationResult(response.data);
+      showToast("Simulation completed successfully.", "success");
+
+      setTimeout(() => {
+        resultsRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 300);
     } catch (error) {
-      setErrorMessage(
+      const message =
         error.response?.data?.message ||
-          "Unable to run simulation. Please check backend server.",
-      );
+        "Unable to run simulation. Please check backend server.";
+
+      setErrorMessage(message);
+      showToast(message, "error");
     } finally {
       setIsLoading(false);
     }
@@ -102,35 +165,44 @@ function Simulation() {
 
   return (
     <div className="space-y-12">
-      <LoadingOverlay
-        isVisible={isLoading}
-        title="Running Simulation"
-        message="Generating missions, assigning resources, executing events, and calculating results..."
-      />
+      <LoadingOverlay isVisible={isLoading} />
+
+      <Toast message={toast.message} type={toast.type} onClose={clearToast} />
 
       <HeroSection
         onRunSimulation={handleRunSimulation}
         isLoading={isLoading}
       />
 
-      {errorMessage && (
-        <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
-          {errorMessage}
-        </div>
-      )}
+      <AnimatedSection delay={0.05}>
+        <ScenarioBuilderPanel
+          formData={formData}
+          onChange={handleInputChange}
+          onRunSimulation={handleRunSimulation}
+          onReset={handleResetDefaults}
+          isLoading={isLoading}
+        />
+      </AnimatedSection>
 
-      <ScenarioBuilderPanel
-        formData={formData}
-        onChange={handleInputChange}
-        onRunSimulation={handleRunSimulation}
-        onReset={handleResetDefaults}
-        isLoading={isLoading}
-      />
+      <FormError message={errorMessage} />
 
-      <ResultSummary result={simulationResult} />
-      <OperationsOverview result={simulationResult} />
-      <MissionTable result={simulationResult} />
-      <AnalyticsSection result={simulationResult} />
+      <div ref={resultsRef}>
+        <AnimatedSection delay={0.1}>
+          <ResultSummary result={simulationResult} />
+        </AnimatedSection>
+      </div>
+
+      <AnimatedSection delay={0.15}>
+        <OperationsOverview result={simulationResult} />
+      </AnimatedSection>
+
+      <AnimatedSection delay={0.2}>
+        <MissionTable result={simulationResult} />
+      </AnimatedSection>
+
+      <AnimatedSection delay={0.25}>
+        <AnalyticsSection result={simulationResult} />
+      </AnimatedSection>
     </div>
   );
 }
