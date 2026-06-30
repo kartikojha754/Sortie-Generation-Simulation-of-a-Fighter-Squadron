@@ -10,6 +10,7 @@ function ScenarioBuilderPanel({
   formData,
   onChange,
   onRunSimulation,
+  onReset,
   isLoading,
 }) {
   const weatherOptions = [
@@ -152,7 +153,16 @@ function ScenarioBuilderPanel({
         />
       </BuilderSection>
 
-      <div className="flex justify-end border-t border-slate-800 pt-6">
+      <div className="flex flex-col gap-3 border-t border-slate-800 pt-6 sm:flex-row sm:justify-end">
+        <Button
+          variant="secondary"
+          size="lg"
+          onClick={onReset}
+          disabled={isLoading}
+        >
+          Reset Defaults
+        </Button>
+
         <Button
           size="lg"
           icon={<MdPlayArrow />}

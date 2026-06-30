@@ -44,7 +44,44 @@ function Simulation() {
     }));
   }
 
+  function handleResetDefaults() {
+    setFormData(INITIAL_FORM_DATA);
+    setErrorMessage("");
+  }
+
+  function validateForm() {
+    if (formData.aircraftCount < 1) return "Aircraft count must be at least 1.";
+    if (formData.pilotCount < 1) return "Pilot count must be at least 1.";
+    if (formData.groundCrewCount < 1)
+      return "Ground crew count must be at least 1.";
+    if (formData.runwayCount < 1) return "Runway count must be at least 1.";
+    if (formData.missionCount < 1) return "Mission count must be at least 1.";
+    if (formData.simulationDuration < 60)
+      return "Simulation duration must be at least 60 minutes.";
+
+    const abortRates = [
+      formData.groundAbortRate,
+      formData.airAbortRate,
+      formData.weatherAbortRate,
+    ];
+
+    const invalidAbortRate = abortRates.some((rate) => rate < 0 || rate > 1);
+
+    if (invalidAbortRate) {
+      return "Abort rates must be between 0 and 1.";
+    }
+
+    return "";
+  }
+
   async function handleRunSimulation() {
+    const validationError = validateForm();
+
+    if (validationError) {
+      setErrorMessage(validationError);
+      return;
+    }
+
     try {
       setIsLoading(true);
       setErrorMessage("");
@@ -79,6 +116,7 @@ function Simulation() {
         formData={formData}
         onChange={handleInputChange}
         onRunSimulation={handleRunSimulation}
+        onReset={handleResetDefaults}
         isLoading={isLoading}
       />
 
