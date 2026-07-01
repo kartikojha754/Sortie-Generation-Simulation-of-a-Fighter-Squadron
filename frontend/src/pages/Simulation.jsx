@@ -15,6 +15,7 @@ import AnalyticsSection from "../components/simulation/AnalyticsSection";
 import ScenarioBuilderPanel from "../components/simulation/ScenarioBuilderPanel";
 
 import { runCustomSimulation } from "../api/simulationApi";
+import { useSimulation } from "../context/SimulationContext";
 
 const INITIAL_FORM_DATA = {
   aircraftCount: 8,
@@ -32,8 +33,16 @@ const INITIAL_FORM_DATA = {
 };
 
 function Simulation() {
+  const {
+    simulationResult: contextSimulationResult,
+    setSimulationResult: setContextSimulationResult,
+    setLatestSummary,
+  } = useSimulation();
+
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
-  const [simulationResult, setSimulationResult] = useState(null);
+  const [simulationResult, setSimulationResult] = useState(
+    contextSimulationResult,
+  );
   const [isLoading, setIsLoading] = useState(false);
 
   const [errorMessage, setErrorMessage] = useState("");
@@ -43,6 +52,12 @@ function Simulation() {
   });
 
   const resultsRef = useRef(null);
+
+  useEffect(() => {
+    if (contextSimulationResult) {
+      setSimulationResult(contextSimulationResult);
+    }
+  }, [contextSimulationResult]);
 
   function showToast(message, type = "info") {
     setToast({ message, type });
@@ -86,29 +101,14 @@ function Simulation() {
   }
 
   function validateForm() {
-    if (formData.aircraftCount < 1) {
-      return "Aircraft count must be at least 1.";
-    }
-
-    if (formData.pilotCount < 1) {
-      return "Pilot count must be at least 1.";
-    }
-
-    if (formData.groundCrewCount < 1) {
+    if (formData.aircraftCount < 1) return "Aircraft count must be at least 1.";
+    if (formData.pilotCount < 1) return "Pilot count must be at least 1.";
+    if (formData.groundCrewCount < 1)
       return "Ground crew count must be at least 1.";
-    }
-
-    if (formData.runwayCount < 1) {
-      return "Runway count must be at least 1.";
-    }
-
-    if (formData.missionCount < 1) {
-      return "Mission count must be at least 1.";
-    }
-
-    if (formData.simulationDuration < 60) {
+    if (formData.runwayCount < 1) return "Runway count must be at least 1.";
+    if (formData.missionCount < 1) return "Mission count must be at least 1.";
+    if (formData.simulationDuration < 60)
       return "Simulation duration must be at least 60 minutes.";
-    }
 
     const abortRates = [
       formData.groundAbortRate,
@@ -116,9 +116,7 @@ function Simulation() {
       formData.weatherAbortRate,
     ];
 
-    const invalidAbortRate = abortRates.some((rate) => rate < 0 || rate > 1);
-
-    if (invalidAbortRate) {
+    if (abortRates.some((rate) => rate < 0 || rate > 1)) {
       return "Abort rates must be between 0 and 1.";
     }
 
@@ -142,6 +140,9 @@ function Simulation() {
       const response = await runCustomSimulation(formData);
 
       setSimulationResult(response.data);
+      setContextSimulationResult(response.data);
+      setLatestSummary(response.data?.statistics || null);
+
       showToast("Simulation completed successfully.", "success");
 
       setTimeout(() => {

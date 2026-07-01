@@ -1,36 +1,51 @@
 import { FiActivity, FiCheckCircle, FiCpu, FiUsers } from "react-icons/fi";
 
 import StatCard from "../common/StatCard";
+import { useSimulation } from "../../context/SimulationContext";
+
+const formatPercent = (value) => {
+  if (value === null || value === undefined) return "—";
+  return `${Math.round(value * 100)}%`;
+};
 
 const DashboardKpis = () => {
+  const { simulationResult, latestSummary } = useSimulation();
+
+  const statistics = simulationResult?.statistics || latestSummary;
+
+  const totalMissions = statistics?.totalMissions ?? "—";
+  const completedSorties = statistics?.completedSorties ?? "—";
+  const successRate = formatPercent(statistics?.successRate);
+  const abortedMissions = statistics?.abortedMissions ?? "—";
+
   const kpis = [
     {
-      title: "Squadron Readiness",
-      value: "87%",
-      subtitle: "Operationally ready",
+      title: "Total Missions",
+      value: totalMissions,
+      subtitle: "Latest simulation run",
       icon: <FiActivity />,
-      tone: "success",
-    },
-    {
-      title: "Aircraft Available",
-      value: "14 / 16",
-      subtitle: "2 under maintenance",
-      icon: <FiCpu />,
       tone: "primary",
     },
     {
-      title: "Mission Success",
-      value: "94.4%",
-      subtitle: "Latest simulation run",
+      title: "Completed Sorties",
+      value: completedSorties,
+      subtitle: "Successfully completed missions",
       icon: <FiCheckCircle />,
       tone: "success",
     },
     {
-      title: "Active Pilots",
-      value: "22",
-      subtitle: "Ready for assignment",
+      title: "Success Rate",
+      value: successRate,
+      subtitle: "Mission completion efficiency",
+      icon: <FiCpu />,
+      tone: "success",
+    },
+    {
+      title: "Aborted Missions",
+      value: abortedMissions,
+      subtitle: "Ground, air, or weather aborts",
       icon: <FiUsers />,
-      tone: "warning",
+      tone: abortedMissions > 0 ? "warning" : "primary",
     },
   ];
 
