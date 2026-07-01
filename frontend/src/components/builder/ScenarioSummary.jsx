@@ -9,40 +9,63 @@ import {
 
 import ConfigurationPanel from "../configuration/ConfigurationPanel";
 
-const summaryItems = [
-  {
-    icon: <FiActivity />,
-    label: "Mission Configuration",
-    value: "18 Missions • High Priority",
-  },
-  {
-    icon: <FiMap />,
-    label: "Aircraft & Runways",
-    value: "16 Aircraft • 2 Runways",
-  },
-  {
-    icon: <FiUsers />,
-    label: "Personnel",
-    value: "24 Pilots • 6 Ground Crew Teams",
-  },
-  {
-    icon: <FiCloud />,
-    label: "Environment",
-    value: "Clear Weather • Day Operations",
-  },
-  {
-    icon: <FiTruck />,
-    label: "Resources",
-    value: "Fuel & Weapons Available",
-  },
-  {
-    icon: <FiShield />,
-    label: "Simulation Rules",
-    value: "Balanced Scheduling • Strict Constraints",
-  },
-];
+import { useScenario } from "../../context/ScenarioContext";
+
+const formatLabel = (value) => {
+  if (!value) return "Not selected";
+
+  return value
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
 
 const ScenarioSummary = () => {
+  const { scenario } = useScenario();
+
+  const summaryItems = [
+    {
+      icon: <FiActivity />,
+      label: "Mission Configuration",
+      value: `${scenario.missionCount} Missions • ${formatLabel(
+        scenario.scenario.mission.missionPriority,
+      )}`,
+    },
+    {
+      icon: <FiMap />,
+      label: "Aircraft & Runways",
+      value: `${scenario.squadron.aircraft.totalAircraft} Aircraft • ${scenario.squadron.runways.operationalRunways} Operational Runways`,
+    },
+    {
+      icon: <FiUsers />,
+      label: "Personnel",
+      value: `${scenario.squadron.pilots.totalPilots} Pilots • ${scenario.squadron.groundCrew.totalTeams} Ground Crew Teams`,
+    },
+    {
+      icon: <FiCloud />,
+      label: "Environment",
+      value: `${formatLabel(
+        scenario.scenario.environment.weatherCondition,
+      )} Weather • ${formatLabel(
+        scenario.scenario.environment.timeOfDay,
+      )} Operations`,
+    },
+    {
+      icon: <FiTruck />,
+      label: "Resources",
+      value: `${scenario.scenario.constraints.availableFuelUnits} Fuel Units • ${scenario.scenario.constraints.availableWeaponPackages} Weapon Packages`,
+    },
+    {
+      icon: <FiShield />,
+      label: "Simulation Rules",
+      value: `${formatLabel(
+        scenario.scenario.scheduling.missionSchedulingStrategy,
+      )} Scheduling • ${formatLabel(
+        scenario.scenario.constraints.constraintEnforcement,
+      )} Constraints`,
+    },
+  ];
+
   return (
     <ConfigurationPanel
       eyebrow="Scenario"

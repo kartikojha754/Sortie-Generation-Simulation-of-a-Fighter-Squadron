@@ -1,30 +1,31 @@
-import axios from "axios";
+import apiClient from "./apiClient";
 
-const API_BASE_URL = "http://localhost:5000/api/simulation";
-
-export async function runCustomSimulation(simulationInput) {
-  const response = await axios.post(`${API_BASE_URL}/run`, simulationInput);
-
+export const runSampleSimulation = async () => {
+  const response = await apiClient.get("/simulation/sample");
   return response.data;
-}
+};
 
-export async function runCustomSimulationSummary(simulationInput) {
-  const response = await axios.post(
-    `${API_BASE_URL}/run/summary`,
-    simulationInput,
+export const runSampleSummary = async () => {
+  const response = await apiClient.get("/simulation/sample/summary");
+  return response.data;
+};
+
+export const runCustomSimulation = async (scenarioPayload) => {
+  const response = await apiClient.post("/simulation/run", scenarioPayload);
+  return response.data;
+};
+
+export const runCustomSummary = async (scenarioPayload) => {
+  const response = await apiClient.post(
+    "/simulation/run/summary",
+    scenarioPayload,
   );
-
   return response.data;
-}
+};
 
-export async function runSampleSimulation() {
-  const response = await axios.get(`${API_BASE_URL}/sample`);
-
-  return response.data;
-}
-
-export async function runSampleSimulationSummary() {
-  const response = await axios.get(`${API_BASE_URL}/sample/summary`);
-
-  return response.data;
-}
+export const simulationApi = {
+  runSampleSimulation,
+  runSampleSummary,
+  runCustomSimulation,
+  runCustomSummary,
+};
