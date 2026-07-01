@@ -6,79 +6,103 @@ import Input from "../common/Input";
 import Select from "../common/Select";
 import Toggle from "../common/Toggle";
 
+import { useScenarioSection } from "../../hooks/useScenarioSection";
+
 const SchedulingConfiguration = () => {
+  const { section: scheduling, updateField } = useScenarioSection(
+    "scenario",
+    "scheduling",
+  );
+
   return (
     <ConfigurationPanel
       eyebrow="Scheduling"
       title="Scheduling Configuration"
-      description="Define how missions are sequenced, prioritized, and distributed across the simulation timeline."
+      description="Configure mission sequencing and timeline behavior."
     >
       <ConfigurationGrid columns={2}>
-        <ConfigurationSection
-          title="Scheduling Strategy"
-          description="Controls how the backend chooses the next mission to generate or assign."
-        >
-          <Select label="Mission Scheduling Strategy">
-            <option value="">Select strategy</option>
-            <option value="sequential">Sequential Scheduling</option>
+        <ConfigurationSection title="Scheduling Strategy">
+          <Select
+            label="Mission Scheduling Strategy"
+            value={scheduling.missionSchedulingStrategy}
+            onChange={(e) =>
+              updateField("missionSchedulingStrategy", e.target.value)
+            }
+          >
+            <option value="sequential">Sequential</option>
             <option value="priority_based">Priority Based</option>
-            <option value="balanced">Balanced Resource Usage</option>
-            <option value="randomized">Randomized Scheduling</option>
+            <option value="balanced">Balanced</option>
+            <option value="randomized">Randomized</option>
           </Select>
 
-          <Toggle label="Enable Dynamic Re-Scheduling" />
-        </ConfigurationSection>
-
-        <ConfigurationSection
-          title="Timeline Distribution"
-          description="Defines how sorties are distributed across the available simulation duration."
-        >
-          <Select label="Distribution Mode">
-            <option value="">Select distribution</option>
-            <option value="even">Evenly Distributed</option>
-            <option value="front_loaded">Front Loaded</option>
-            <option value="back_loaded">Back Loaded</option>
-            <option value="random">Random Distribution</option>
-          </Select>
-
-          <Input
-            label="Minimum Gap Between Missions (minutes)"
-            type="number"
-            min="0"
-            placeholder="10"
+          <Toggle
+            label="Enable Dynamic Re-Scheduling"
+            checked={scheduling.dynamicRescheduling}
+            onChange={(e) =>
+              updateField("dynamicRescheduling", e.target.checked)
+            }
           />
         </ConfigurationSection>
 
-        <ConfigurationSection
-          title="Priority Handling"
-          description="Controls how high-priority missions affect resource allocation."
-        >
-          <Toggle label="Prioritize Critical Missions" />
+        <ConfigurationSection title="Timeline Distribution">
+          <Select
+            label="Distribution Mode"
+            value={scheduling.distributionMode}
+            onChange={(e) => updateField("distributionMode", e.target.value)}
+          >
+            <option value="even">Even</option>
+            <option value="front_loaded">Front Loaded</option>
+            <option value="back_loaded">Back Loaded</option>
+            <option value="random">Random</option>
+          </Select>
+
+          <Input
+            label="Minimum Gap (minutes)"
+            type="number"
+            value={scheduling.minimumGapMinutes}
+            onChange={(e) =>
+              updateField("minimumGapMinutes", Number(e.target.value))
+            }
+          />
+        </ConfigurationSection>
+
+        <ConfigurationSection title="Priority">
+          <Toggle
+            label="Prioritize Critical Missions"
+            checked={scheduling.prioritizeCriticalMissions}
+            onChange={(e) =>
+              updateField("prioritizeCriticalMissions", e.target.checked)
+            }
+          />
 
           <Input
             label="Priority Boost Factor"
             type="number"
-            min="1"
-            placeholder="2"
+            value={scheduling.priorityBoostFactor}
+            onChange={(e) =>
+              updateField("priorityBoostFactor", Number(e.target.value))
+            }
           />
         </ConfigurationSection>
 
-        <ConfigurationSection
-          title="Delay Handling"
-          description="Defines how the simulation responds when required resources are not available."
-        >
-          <Select label="Delay Policy">
-            <option value="">Select policy</option>
-            <option value="wait">Wait Until Resources Available</option>
-            <option value="skip">Skip Mission</option>
-            <option value="abort">Mark as Ground Abort</option>
+        <ConfigurationSection title="Delay Handling">
+          <Select
+            label="Delay Policy"
+            value={scheduling.delayPolicy}
+            onChange={(e) => updateField("delayPolicy", e.target.value)}
+          >
+            <option value="wait">Wait</option>
+            <option value="skip">Skip</option>
+            <option value="abort">Ground Abort</option>
           </Select>
 
           <Input
-            label="Maximum Allowed Delay (minutes)"
+            label="Maximum Delay (minutes)"
             type="number"
-            min="0"
-            placeholder="60"
+            value={scheduling.maxAllowedDelayMinutes}
+            onChange={(e) =>
+              updateField("maxAllowedDelayMinutes", Number(e.target.value))
+            }
           />
         </ConfigurationSection>
       </ConfigurationGrid>

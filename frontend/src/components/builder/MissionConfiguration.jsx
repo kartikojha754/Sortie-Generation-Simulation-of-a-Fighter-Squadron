@@ -6,7 +6,13 @@ import Input from "../common/Input";
 import Select from "../common/Select";
 import Toggle from "../common/Toggle";
 
+import { useScenario } from "../../context/ScenarioContext";
+
 const MissionConfiguration = () => {
+  const { scenario, updateScenarioField, updateMissionCount } = useScenario();
+
+  const mission = scenario.scenario.mission;
+
   return (
     <ConfigurationPanel
       eyebrow="Mission"
@@ -18,13 +24,27 @@ const MissionConfiguration = () => {
           title="Mission Demand"
           description="Controls how many sorties the backend simulation engine should attempt to generate."
         >
-          <Input label="Mission Count" type="number" min="1" placeholder="18" />
+          <Input
+            label="Mission Count"
+            type="number"
+            min="1"
+            value={scenario.missionCount}
+            onChange={(e) => updateMissionCount(Number(e.target.value))}
+          />
 
           <Input
             label="Simulation Duration (hours)"
             type="number"
             min="1"
-            placeholder="8"
+            value={mission.simulationDurationHours}
+            onChange={(e) =>
+              updateScenarioField(
+                "scenario",
+                "mission",
+                "simulationDurationHours",
+                Number(e.target.value),
+              )
+            }
           />
         </ConfigurationSection>
 
@@ -32,7 +52,18 @@ const MissionConfiguration = () => {
           title="Mission Profile"
           description="Defines the primary mission characteristics used during scenario generation."
         >
-          <Select label="Primary Mission Type">
+          <Select
+            label="Primary Mission Type"
+            value={mission.primaryMissionType}
+            onChange={(e) =>
+              updateScenarioField(
+                "scenario",
+                "mission",
+                "primaryMissionType",
+                e.target.value,
+              )
+            }
+          >
             <option value="">Select mission type</option>
             <option value="combat_air_patrol">Combat Air Patrol</option>
             <option value="strike">Strike</option>
@@ -41,7 +72,18 @@ const MissionConfiguration = () => {
             <option value="training">Training</option>
           </Select>
 
-          <Select label="Mission Priority">
+          <Select
+            label="Mission Priority"
+            value={mission.missionPriority}
+            onChange={(e) =>
+              updateScenarioField(
+                "scenario",
+                "mission",
+                "missionPriority",
+                e.target.value,
+              )
+            }
+          >
             <option value="">Select priority</option>
             <option value="low">Low</option>
             <option value="normal">Normal</option>
@@ -54,9 +96,31 @@ const MissionConfiguration = () => {
           title="Scheduling Behavior"
           description="Controls whether missions are generated sequentially or distributed across the simulation window."
         >
-          <Toggle label="Enable Random Scheduling" />
+          <Toggle
+            label="Enable Random Scheduling"
+            checked={mission.randomScheduling}
+            onChange={(e) =>
+              updateScenarioField(
+                "scenario",
+                "mission",
+                "randomScheduling",
+                e.target.checked,
+              )
+            }
+          />
 
-          <Toggle label="Allow Mission Overlap" />
+          <Toggle
+            label="Allow Mission Overlap"
+            checked={mission.allowMissionOverlap}
+            onChange={(e) =>
+              updateScenarioField(
+                "scenario",
+                "mission",
+                "allowMissionOverlap",
+                e.target.checked,
+              )
+            }
+          />
         </ConfigurationSection>
 
         <ConfigurationSection
@@ -67,14 +131,30 @@ const MissionConfiguration = () => {
             label="Minimum Preparation Time (minutes)"
             type="number"
             min="0"
-            placeholder="30"
+            value={mission.minimumPreparationTimeMinutes}
+            onChange={(e) =>
+              updateScenarioField(
+                "scenario",
+                "mission",
+                "minimumPreparationTimeMinutes",
+                Number(e.target.value),
+              )
+            }
           />
 
           <Input
             label="Mission Duration Estimate (minutes)"
             type="number"
             min="1"
-            placeholder="90"
+            value={mission.missionDurationEstimateMinutes}
+            onChange={(e) =>
+              updateScenarioField(
+                "scenario",
+                "mission",
+                "missionDurationEstimateMinutes",
+                Number(e.target.value),
+              )
+            }
           />
         </ConfigurationSection>
       </ConfigurationGrid>

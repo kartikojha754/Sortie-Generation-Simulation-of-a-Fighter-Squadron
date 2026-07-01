@@ -6,7 +6,14 @@ import Input from "../common/Input";
 import Select from "../common/Select";
 import Toggle from "../common/Toggle";
 
+import { useScenarioSection } from "../../hooks/useScenarioSection";
+
 const GroundCrewConfiguration = () => {
+  const { section: groundCrew, updateField } = useScenarioSection(
+    "squadron",
+    "groundCrew",
+  );
+
   return (
     <ConfigurationPanel
       eyebrow="Ground Crew"
@@ -14,64 +21,81 @@ const GroundCrewConfiguration = () => {
       description="Define ground crew capacity, preparation capability, maintenance support, and shift behavior for aircraft turnaround."
     >
       <ConfigurationGrid columns={2}>
-        <ConfigurationSection
-          title="Crew Pool"
-          description="Controls the number of ground crew teams available during the scenario."
-        >
+        <ConfigurationSection title="Crew Pool">
           <Input
             label="Total Ground Crew Teams"
             type="number"
             min="1"
-            placeholder="6"
+            value={groundCrew.totalTeams}
+            onChange={(e) => updateField("totalTeams", Number(e.target.value))}
           />
 
           <Input
             label="Available Crew Teams"
             type="number"
             min="0"
-            placeholder="5"
+            value={groundCrew.availableTeams}
+            onChange={(e) =>
+              updateField("availableTeams", Number(e.target.value))
+            }
           />
         </ConfigurationSection>
 
-        <ConfigurationSection
-          title="Preparation Capacity"
-          description="Defines how many aircraft can be prepared in parallel before sorties."
-        >
+        <ConfigurationSection title="Preparation Capacity">
           <Input
             label="Aircraft Prepared Per Team"
             type="number"
             min="1"
-            placeholder="1"
+            value={groundCrew.aircraftPreparedPerTeam}
+            onChange={(e) =>
+              updateField("aircraftPreparedPerTeam", Number(e.target.value))
+            }
           />
 
           <Input
             label="Average Preparation Time (minutes)"
             type="number"
             min="0"
-            placeholder="35"
+            value={groundCrew.averagePreparationTimeMinutes}
+            onChange={(e) =>
+              updateField(
+                "averagePreparationTimeMinutes",
+                Number(e.target.value),
+              )
+            }
           />
         </ConfigurationSection>
 
-        <ConfigurationSection
-          title="Maintenance Support"
-          description="Controls whether crew teams are also responsible for maintenance recovery."
-        >
-          <Toggle label="Allow Crew Maintenance Assignment" />
+        <ConfigurationSection title="Maintenance Support">
+          <Toggle
+            label="Allow Crew Maintenance Assignment"
+            checked={groundCrew.maintenanceAssignment}
+            onChange={(e) =>
+              updateField("maintenanceAssignment", e.target.checked)
+            }
+          />
 
           <Input
             label="Maintenance Crew Allocation (%)"
             type="number"
             min="0"
             max="100"
-            placeholder="30"
+            value={groundCrew.maintenanceCrewAllocationPercent}
+            onChange={(e) =>
+              updateField(
+                "maintenanceCrewAllocationPercent",
+                Number(e.target.value),
+              )
+            }
           />
         </ConfigurationSection>
 
-        <ConfigurationSection
-          title="Shift Rules"
-          description="Defines ground crew operating limits during longer simulation windows."
-        >
-          <Select label="Crew Shift Model">
+        <ConfigurationSection title="Shift Rules">
+          <Select
+            label="Crew Shift Model"
+            value={groundCrew.shiftModel}
+            onChange={(e) => updateField("shiftModel", e.target.value)}
+          >
             <option value="">Select shift model</option>
             <option value="single_shift">Single Shift</option>
             <option value="two_shift">Two Shift Rotation</option>
@@ -82,7 +106,10 @@ const GroundCrewConfiguration = () => {
             label="Crew Rest Time (minutes)"
             type="number"
             min="0"
-            placeholder="60"
+            value={groundCrew.crewRestTimeMinutes}
+            onChange={(e) =>
+              updateField("crewRestTimeMinutes", Number(e.target.value))
+            }
           />
         </ConfigurationSection>
       </ConfigurationGrid>

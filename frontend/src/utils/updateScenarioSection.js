@@ -1,14 +1,18 @@
 export const updateScenarioSection = (
-  scenario,
+  currentScenario,
+  parentKey,
   sectionName,
   fieldName,
   value,
 ) => {
   return {
-    ...scenario,
-    [sectionName]: {
-      ...scenario[sectionName],
-      [fieldName]: value,
+    ...currentScenario,
+    [parentKey]: {
+      ...currentScenario[parentKey],
+      [sectionName]: {
+        ...currentScenario[parentKey][sectionName],
+        [fieldName]: value,
+      },
     },
   };
 };

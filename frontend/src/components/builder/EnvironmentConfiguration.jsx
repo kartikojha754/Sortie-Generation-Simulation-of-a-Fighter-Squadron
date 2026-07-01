@@ -6,20 +6,27 @@ import Input from "../common/Input";
 import Select from "../common/Select";
 import Toggle from "../common/Toggle";
 
+import { useScenarioSection } from "../../hooks/useScenarioSection";
+
 const EnvironmentConfiguration = () => {
+  const { section: environment, updateField } = useScenarioSection(
+    "scenario",
+    "environment",
+  );
+
   return (
     <ConfigurationPanel
       eyebrow="Environment"
       title="Environment Configuration"
-      description="Define weather, visibility, wind, and time-of-day conditions that influence sortie execution and abort probability."
+      description="Define weather, visibility, wind, and time-of-day conditions."
     >
       <ConfigurationGrid columns={2}>
-        <ConfigurationSection
-          title="Weather Conditions"
-          description="Sets the primary environmental condition for the simulation window."
-        >
-          <Select label="Weather Condition">
-            <option value="">Select weather</option>
+        <ConfigurationSection title="Weather">
+          <Select
+            label="Weather Condition"
+            value={environment.weatherCondition}
+            onChange={(e) => updateField("weatherCondition", e.target.value)}
+          >
             <option value="clear">Clear</option>
             <option value="cloudy">Cloudy</option>
             <option value="rain">Rain</option>
@@ -30,57 +37,70 @@ const EnvironmentConfiguration = () => {
           <Input
             label="Weather Severity (%)"
             type="number"
-            min="0"
-            max="100"
-            placeholder="20"
+            value={environment.weatherSeverityPercent}
+            onChange={(e) =>
+              updateField("weatherSeverityPercent", Number(e.target.value))
+            }
           />
         </ConfigurationSection>
 
-        <ConfigurationSection
-          title="Visibility"
-          description="Controls how visibility affects mission launch and completion conditions."
-        >
+        <ConfigurationSection title="Visibility">
           <Input
             label="Visibility Range (km)"
             type="number"
-            min="0"
-            placeholder="10"
+            value={environment.visibilityRangeKm}
+            onChange={(e) =>
+              updateField("visibilityRangeKm", Number(e.target.value))
+            }
           />
 
-          <Toggle label="Allow Low Visibility Operations" />
+          <Toggle
+            label="Allow Low Visibility Operations"
+            checked={environment.lowVisibilityOperations}
+            onChange={(e) =>
+              updateField("lowVisibilityOperations", e.target.checked)
+            }
+          />
         </ConfigurationSection>
 
-        <ConfigurationSection
-          title="Wind Conditions"
-          description="Defines wind impact on takeoff, landing, and mission safety."
-        >
+        <ConfigurationSection title="Wind">
           <Input
             label="Wind Speed (knots)"
             type="number"
-            min="0"
-            placeholder="12"
+            value={environment.windSpeedKnots}
+            onChange={(e) =>
+              updateField("windSpeedKnots", Number(e.target.value))
+            }
           />
 
           <Input
             label="Crosswind Limit (knots)"
             type="number"
-            min="0"
-            placeholder="25"
+            value={environment.crosswindLimitKnots}
+            onChange={(e) =>
+              updateField("crosswindLimitKnots", Number(e.target.value))
+            }
           />
         </ConfigurationSection>
 
-        <ConfigurationSection
-          title="Time Conditions"
-          description="Defines whether missions occur during day, night, or mixed operational windows."
-        >
-          <Select label="Time of Day">
-            <option value="">Select time condition</option>
-            <option value="day">Day Operations</option>
-            <option value="night">Night Operations</option>
-            <option value="mixed">Mixed Day/Night</option>
+        <ConfigurationSection title="Time">
+          <Select
+            label="Time of Day"
+            value={environment.timeOfDay}
+            onChange={(e) => updateField("timeOfDay", e.target.value)}
+          >
+            <option value="day">Day</option>
+            <option value="night">Night</option>
+            <option value="mixed">Mixed</option>
           </Select>
 
-          <Toggle label="Enable Night Operation Penalty" />
+          <Toggle
+            label="Enable Night Operation Penalty"
+            checked={environment.nightOperationPenalty}
+            onChange={(e) =>
+              updateField("nightOperationPenalty", e.target.checked)
+            }
+          />
         </ConfigurationSection>
       </ConfigurationGrid>
     </ConfigurationPanel>

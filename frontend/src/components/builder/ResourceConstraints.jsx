@@ -3,94 +3,112 @@ import ConfigurationGrid from "../configuration/ConfigurationGrid";
 import ConfigurationSection from "../configuration/ConfigurationSection";
 
 import Input from "../common/Input";
+import Select from "../common/Select";
 import Toggle from "../common/Toggle";
 
+import { useScenarioSection } from "../../hooks/useScenarioSection";
+
 const ResourceConstraints = () => {
+  const { section: constraints, updateField } = useScenarioSection(
+    "scenario",
+    "constraints",
+  );
+
   return (
     <ConfigurationPanel
       eyebrow="Constraints"
       title="Resource Constraints"
-      description="Define logistical and operational resource limits that affect sortie generation capacity."
+      description="Define consumable and operational constraints that may limit sortie generation even when aircraft and pilots are available."
     >
       <ConfigurationGrid columns={2}>
-        <ConfigurationSection
-          title="Fuel Constraints"
-          description="Controls available fuel reserves and fuel usage limits for generated missions."
-        >
+        <ConfigurationSection title="Fuel Constraints">
           <Input
-            label="Total Fuel Reserve (units)"
+            label="Available Fuel Units"
             type="number"
             min="0"
-            placeholder="50000"
+            value={constraints.availableFuelUnits}
+            onChange={(e) =>
+              updateField("availableFuelUnits", Number(e.target.value))
+            }
           />
 
           <Input
             label="Average Fuel Per Mission"
             type="number"
             min="0"
-            placeholder="2500"
+            value={constraints.averageFuelPerMission}
+            onChange={(e) =>
+              updateField("averageFuelPerMission", Number(e.target.value))
+            }
           />
         </ConfigurationSection>
 
-        <ConfigurationSection
-          title="Spare Parts"
-          description="Defines availability of spare parts required for aircraft recovery and maintenance."
-        >
+        <ConfigurationSection title="Weapons Stock">
           <Input
-            label="Spare Parts Inventory"
+            label="Available Weapon Packages"
             type="number"
             min="0"
-            placeholder="120"
+            value={constraints.availableWeaponPackages}
+            onChange={(e) =>
+              updateField("availableWeaponPackages", Number(e.target.value))
+            }
           />
 
+          <Select
+            label="Weapon Allocation Policy"
+            value={constraints.weaponAllocationPolicy}
+            onChange={(e) =>
+              updateField("weaponAllocationPolicy", e.target.value)
+            }
+          >
+            <option value="first_available">First Available</option>
+            <option value="priority_based">Priority Based</option>
+            <option value="conservative">Conservative Usage</option>
+          </Select>
+        </ConfigurationSection>
+
+        <ConfigurationSection title="Spare Parts">
           <Input
-            label="Average Parts Used Per Maintenance"
+            label="Spare Parts Stock"
             type="number"
             min="0"
-            placeholder="3"
+            value={constraints.sparePartsStock}
+            onChange={(e) =>
+              updateField("sparePartsStock", Number(e.target.value))
+            }
+          />
+
+          <Toggle
+            label="Limit Maintenance by Spare Parts"
+            checked={constraints.limitMaintenanceBySpareParts}
+            onChange={(e) =>
+              updateField("limitMaintenanceBySpareParts", e.target.checked)
+            }
           />
         </ConfigurationSection>
 
-        <ConfigurationSection
-          title="Maintenance Capacity"
-          description="Controls how many aircraft can be handled by maintenance resources at the same time."
-        >
-          <Input
-            label="Maintenance Bays"
-            type="number"
-            min="0"
-            placeholder="4"
-          />
+        <ConfigurationSection title="Constraint Policy">
+          <Select
+            label="Constraint Enforcement"
+            value={constraints.constraintEnforcement}
+            onChange={(e) =>
+              updateField("constraintEnforcement", e.target.value)
+            }
+          >
+            <option value="strict">Strict</option>
+            <option value="balanced">Balanced</option>
+            <option value="relaxed">Relaxed</option>
+          </Select>
 
-          <Input
-            label="Max Concurrent Maintenance Jobs"
-            type="number"
-            min="0"
-            placeholder="3"
-          />
-        </ConfigurationSection>
-
-        <ConfigurationSection
-          title="Operational Reserve"
-          description="Defines minimum resource reserves that should not be consumed during normal operations."
-        >
-          <Toggle label="Maintain Aircraft Reserve" />
-
-          <Input
-            label="Reserved Aircraft Count"
-            type="number"
-            min="0"
-            placeholder="2"
-          />
-
-          <Toggle label="Maintain Fuel Reserve" />
-
-          <Input
-            label="Fuel Reserve Threshold (%)"
-            type="number"
-            min="0"
-            max="100"
-            placeholder="15"
+          <Toggle
+            label="Allow Resource Override for Critical Missions"
+            checked={constraints.resourceOverrideForCriticalMissions}
+            onChange={(e) =>
+              updateField(
+                "resourceOverrideForCriticalMissions",
+                e.target.checked,
+              )
+            }
           />
         </ConfigurationSection>
       </ConfigurationGrid>

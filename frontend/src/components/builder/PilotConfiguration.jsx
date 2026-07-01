@@ -6,7 +6,14 @@ import Input from "../common/Input";
 import Select from "../common/Select";
 import Toggle from "../common/Toggle";
 
+import { useScenarioSection } from "../../hooks/useScenarioSection";
+
 const PilotConfiguration = () => {
+  const { section: pilots, updateField } = useScenarioSection(
+    "squadron",
+    "pilots",
+  );
+
   return (
     <ConfigurationPanel
       eyebrow="Pilots"
@@ -14,25 +21,32 @@ const PilotConfiguration = () => {
       description="Define pilot availability, qualification level, fatigue behavior, and flight-hour limits used during mission assignment."
     >
       <ConfigurationGrid columns={2}>
-        <ConfigurationSection
-          title="Pilot Pool"
-          description="Controls the number of pilots available for sortie generation."
-        >
-          <Input label="Total Pilots" type="number" min="1" placeholder="24" />
+        <ConfigurationSection title="Pilot Pool">
+          <Input
+            label="Total Pilots"
+            type="number"
+            min="1"
+            value={pilots.totalPilots}
+            onChange={(e) => updateField("totalPilots", Number(e.target.value))}
+          />
 
           <Input
             label="Available Pilots"
             type="number"
             min="0"
-            placeholder="22"
+            value={pilots.availablePilots}
+            onChange={(e) =>
+              updateField("availablePilots", Number(e.target.value))
+            }
           />
         </ConfigurationSection>
 
-        <ConfigurationSection
-          title="Pilot Qualification"
-          description="Defines the general skill and readiness profile of the squadron pilot group."
-        >
-          <Select label="Average Pilot Rating">
+        <ConfigurationSection title="Pilot Qualification">
+          <Select
+            label="Average Pilot Rating"
+            value={pilots.averagePilotRating}
+            onChange={(e) => updateField("averagePilotRating", e.target.value)}
+          >
             <option value="">Select rating</option>
             <option value="trainee">Trainee</option>
             <option value="standard">Standard</option>
@@ -40,7 +54,13 @@ const PilotConfiguration = () => {
             <option value="instructor">Instructor</option>
           </Select>
 
-          <Select label="Mission Qualification">
+          <Select
+            label="Mission Qualification"
+            value={pilots.missionQualification}
+            onChange={(e) =>
+              updateField("missionQualification", e.target.value)
+            }
+          >
             <option value="">Select qualification</option>
             <option value="basic">Basic Missions</option>
             <option value="combat">Combat Missions</option>
@@ -49,36 +69,43 @@ const PilotConfiguration = () => {
           </Select>
         </ConfigurationSection>
 
-        <ConfigurationSection
-          title="Fatigue Rules"
-          description="Controls whether repeated assignments reduce pilot availability during simulation."
-        >
-          <Toggle label="Enable Pilot Fatigue" />
+        <ConfigurationSection title="Fatigue Rules">
+          <Toggle
+            label="Enable Pilot Fatigue"
+            checked={pilots.pilotFatigue}
+            onChange={(e) => updateField("pilotFatigue", e.target.checked)}
+          />
 
           <Input
             label="Rest Time Required (minutes)"
             type="number"
             min="0"
-            placeholder="90"
+            value={pilots.restTimeMinutes}
+            onChange={(e) =>
+              updateField("restTimeMinutes", Number(e.target.value))
+            }
           />
         </ConfigurationSection>
 
-        <ConfigurationSection
-          title="Flight Limits"
-          description="Defines operational limits for assigning pilots to multiple sorties."
-        >
+        <ConfigurationSection title="Flight Limits">
           <Input
             label="Max Sorties Per Pilot"
             type="number"
             min="1"
-            placeholder="2"
+            value={pilots.maxSortiesPerPilot}
+            onChange={(e) =>
+              updateField("maxSortiesPerPilot", Number(e.target.value))
+            }
           />
 
           <Input
             label="Max Flight Hours Per Pilot"
             type="number"
             min="1"
-            placeholder="6"
+            value={pilots.maxFlightHoursPerPilot}
+            onChange={(e) =>
+              updateField("maxFlightHoursPerPilot", Number(e.target.value))
+            }
           />
         </ConfigurationSection>
       </ConfigurationGrid>
