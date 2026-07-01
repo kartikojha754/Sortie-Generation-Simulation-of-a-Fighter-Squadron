@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import AnimatedSection from "../components/common/AnimatedSection";
 import SectionHeader from "../components/common/SectionHeader";
 
@@ -15,7 +17,11 @@ import ResourceConstraints from "../components/builder/ResourceConstraints";
 import ScenarioSummary from "../components/builder/ScenarioSummary";
 import ScenarioActions from "../components/builder/ScenarioActions";
 
+import { defaultScenario } from "../utils/defaultScenario";
+
 const ScenarioBuilder = () => {
+  const [scenario, setScenario] = useState(defaultScenario);
+
   return (
     <div className="space-y-8 pb-24">
       <AnimatedSection>
@@ -31,50 +37,62 @@ const ScenarioBuilder = () => {
       </AnimatedSection>
 
       <AnimatedSection>
-        <MissionConfiguration />
+        <MissionConfiguration scenario={scenario} setScenario={setScenario} />
       </AnimatedSection>
 
       <AnimatedSection>
-        <AircraftConfiguration />
+        <AircraftConfiguration scenario={scenario} setScenario={setScenario} />
       </AnimatedSection>
 
       <AnimatedSection>
-        <PilotConfiguration />
+        <PilotConfiguration scenario={scenario} setScenario={setScenario} />
       </AnimatedSection>
 
       <AnimatedSection>
-        <GroundCrewConfiguration />
+        <GroundCrewConfiguration
+          scenario={scenario}
+          setScenario={setScenario}
+        />
       </AnimatedSection>
 
       <AnimatedSection>
-        <RunwayConfiguration />
+        <RunwayConfiguration scenario={scenario} setScenario={setScenario} />
       </AnimatedSection>
 
       <AnimatedSection>
-        <EnvironmentConfiguration />
+        <EnvironmentConfiguration
+          scenario={scenario}
+          setScenario={setScenario}
+        />
       </AnimatedSection>
 
       <AnimatedSection>
-        <SchedulingConfiguration />
+        <SchedulingConfiguration
+          scenario={scenario}
+          setScenario={setScenario}
+        />
       </AnimatedSection>
 
       <AnimatedSection>
-        <RulesConfiguration />
+        <RulesConfiguration scenario={scenario} setScenario={setScenario} />
       </AnimatedSection>
 
       <AnimatedSection>
-        <MissionMixConfiguration />
+        <MissionMixConfiguration
+          scenario={scenario}
+          setScenario={setScenario}
+        />
       </AnimatedSection>
 
       <AnimatedSection>
-        <ResourceConstraints />
+        <ResourceConstraints scenario={scenario} setScenario={setScenario} />
       </AnimatedSection>
 
       <AnimatedSection>
-        <ScenarioSummary />
+        <ScenarioSummary scenario={scenario} />
       </AnimatedSection>
 
-      <ScenarioActions />
+      <ScenarioActions scenario={scenario} setScenario={setScenario} />
     </div>
   );
 };
