@@ -4,9 +4,13 @@ import SectionHeader from "../components/common/SectionHeader";
 import DashboardHero from "../components/dashboard/DashboardHero";
 import DashboardKpis from "../components/dashboard/DashboardKpis";
 import RecentSimulationSummary from "../components/dashboard/RecentSimulationSummary";
+import SquadronSnapshot from "../components/dashboard/SquadronSnapshot";
+import MissionOutcomeBreakdown from "../components/dashboard/MissionOutcomeBreakdown";
+import MissionAnalytics from "../components/dashboard/MissionAnalytics";
 import QuickNavigation from "../components/dashboard/QuickNavigation";
 import SystemHealth from "../components/dashboard/SystemHealth";
 import RecentActivity from "../components/dashboard/RecentActivity";
+import MaintenanceOverview from "../components/dashboard/MaintenanceOverview";
 
 const Dashboard = () => {
   return (
@@ -32,7 +36,15 @@ const Dashboard = () => {
       </AnimatedSection>
 
       <AnimatedSection>
-        <QuickNavigation />
+        <MissionAnalytics />
+      </AnimatedSection>
+
+      <AnimatedSection>
+        <MissionOutcomeBreakdown />
+      </AnimatedSection>
+
+      <AnimatedSection>
+        <SquadronSnapshot />
       </AnimatedSection>
 
       <div className="grid gap-6 xl:grid-cols-2">
@@ -44,6 +56,14 @@ const Dashboard = () => {
           <RecentActivity />
         </AnimatedSection>
       </div>
+
+      <AnimatedSection>
+        <MaintenanceOverview />
+      </AnimatedSection>
+
+      <AnimatedSection>
+        <QuickNavigation />
+      </AnimatedSection>
     </div>
   );
 };
