@@ -1,21 +1,27 @@
 export default function Select({
   label,
-  options = [],
   helperText,
-  error,
+  options = [],
   className = "",
+  selectClassName = "",
   ...props
 }) {
   return (
-    <div className={className}>
+    <label className={["block", className].join(" ")}>
       {label && (
-        <label className="mb-2 block text-sm font-medium text-slate-300">
+        <span className="mb-2 block text-sm font-semibold text-slate-100">
           {label}
-        </label>
+        </span>
       )}
 
       <select
-        className="w-full rounded-xl border border-green-900/40 bg-[#0B0F0D] px-4 py-2.5 text-sm text-slate-100 outline-none transition focus:border-green-500"
+        className={[
+          "w-full rounded-xl border border-green-400/25 bg-[#031006]/90 px-4 py-3",
+          "text-sm text-green-50 outline-none transition",
+          "focus:border-green-300/70 focus:bg-[#06170C] focus:ring-2 focus:ring-green-400/25",
+          "hover:border-green-300/45",
+          selectClassName,
+        ].join(" ")}
         {...props}
       >
         {options.map((option) => (
@@ -25,11 +31,11 @@ export default function Select({
         ))}
       </select>
 
-      {helperText && !error && (
-        <p className="mt-1 text-xs text-slate-500">{helperText}</p>
+      {helperText && (
+        <span className="mt-2 block text-xs leading-relaxed text-slate-400">
+          {helperText}
+        </span>
       )}
-
-      {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
-    </div>
+    </label>
   );
 }

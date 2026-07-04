@@ -1,34 +1,45 @@
 import Card from "../common/Card";
 
-function badge(status) {
+function formatFlightHours(value) {
+  if (value === undefined || value === null) return "0.00 hrs";
+
+  const hours = Number(value);
+  if (Number.isNaN(hours)) return "0.00 hrs";
+
+  return `${hours.toFixed(2)} hrs`;
+}
+
+function getAircraftMissionHistory(aircraftId, missions = []) {
+  return missions.filter((mission) =>
+    mission.aircraftIds?.includes(aircraftId),
+  );
+}
+
+function getMaintenanceCount(aircraftId, maintenanceRecords = []) {
+  return maintenanceRecords.filter((record) => record.aircraftId === aircraftId)
+    .length;
+}
+
+function getStatusClass(status) {
   switch (status) {
     case "AVAILABLE":
       return "border-green-500/40 bg-green-500/10 text-green-300";
-
-    case "AIRBORNE":
-    case "ASSIGNED":
+    case "IN_FLIGHT":
       return "border-sky-500/40 bg-sky-500/10 text-sky-300";
-
     case "MAINTENANCE":
       return "border-amber-500/40 bg-amber-500/10 text-amber-300";
-
     default:
-      return "border-red-500/40 bg-red-500/10 text-red-300";
+      return "border-slate-500/40 bg-slate-500/10 text-slate-300";
   }
 }
 
-function pretty(status) {
-  return status?.replaceAll("_", " ") ?? "-";
-}
-
-function formatFlightHours(value) {
-  if (value === undefined || value === null) return "0 hrs";
-
-  const hours = Number(value);
-
-  if (Number.isNaN(hours)) return "0 hrs";
-
-  return `${hours.toFixed(2)} hrs`;
+function Row({ label, value }) {
+  return (
+    <div className="flex items-center justify-between gap-4 py-1.5">
+      <span className="text-sm text-slate-400">{label}</span>
+      <span className="font-mono text-sm text-slate-200">{value}</span>
+    </div>
+  );
 }
 
 export default function AircraftStatusCards({
@@ -44,110 +55,82 @@ export default function AircraftStatusCards({
         </p>
 
         <h3 className="mt-1 text-lg font-semibold text-slate-100">
-          Aircraft Operational Summary
+          Aircraft Operational Cards
         </h3>
 
         <p className="mt-1 text-sm text-slate-500">
-          Aircraft performance derived from simulation history.
+          Final aircraft state enriched with mission and maintenance history.
         </p>
       </div>
 
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-        {aircraft.map((ac) => {
-          const aircraftId = ac.id;
-
-          const aircraftMissions = missions.filter((m) =>
-            (m.aircraftIds || []).includes(aircraftId),
+        {aircraft.map((item) => {
+          const missionHistory = getAircraftMissionHistory(item.id, missions);
+          const lastMission = missionHistory[missionHistory.length - 1];
+          const maintenanceCount = getMaintenanceCount(
+            item.id,
+            maintenanceRecords,
           );
-
-          const maintenance = maintenanceRecords.filter(
-            (m) => m.aircraftId === aircraftId,
-          );
-
-          const lastMission =
-            aircraftMissions.length > 0
-              ? aircraftMissions[aircraftMissions.length - 1]
-              : null;
-
-          const lastPilot =
-            lastMission?.pilotIds?.length > 0
-              ? lastMission.pilotIds.join(", ")
-              : "-";
 
           return (
             <div
-              key={aircraftId}
-              className="rounded-xl border border-green-900/40 bg-[#0B0F0D] p-5"
+              key={item.id}
+              className="group rounded-2xl border border-green-500/15 bg-[#07100B] p-5 transition duration-200 hover:-translate-y-0.5 hover:border-green-500/30 hover:shadow-[0_0_28px_rgba(34,197,94,0.1)]"
             >
-              <div className="mb-5 flex items-start justify-between">
+              <div className="mb-5 flex items-start justify-between gap-4">
                 <div>
-                  <h4 className="text-xl font-bold text-slate-100">
-                    {ac.tailNumber || aircraftId}
+                  <h4 className="text-2xl font-bold text-slate-100">
+                    {item.tailNumber || item.id}
                   </h4>
-
-                  <p className="text-xs text-slate-500">{ac.aircraftType}</p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    {item.aircraftType}
+                  </p>
                 </div>
 
                 <span
-                  className={`rounded-full border px-3 py-1 text-xs font-semibold ${badge(
-                    ac.status,
+                  className={`rounded-full border px-3 py-1 text-xs font-semibold ${getStatusClass(
+                    item.status,
                   )}`}
                 >
-                  {pretty(ac.status)}
+                  {item.status}
                 </span>
               </div>
 
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Flight Hours</span>
-                  <span>{formatFlightHours(ac.flightHours)}</span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Missions Flown</span>
-                  <span>{aircraftMissions.length}</span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Last Mission</span>
-                  <span>{lastMission?.name || "-"}</span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Last Pilot</span>
-                  <span>{lastPilot}</span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Maintenance Events</span>
-                  <span>{maintenance.length}</span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Current State</span>
-                  <span className="text-green-300">{pretty(ac.status)}</span>
-                </div>
+              <div className="rounded-xl border border-green-900/25 bg-[#050A07]/70 p-4">
+                <Row
+                  label="Flight Hours"
+                  value={formatFlightHours(item.flightHours)}
+                />
+                <Row label="Missions Flown" value={missionHistory.length} />
+                <Row
+                  label="Last Mission"
+                  value={lastMission?.name || lastMission?.id || "-"}
+                />
+                <Row
+                  label="Last Pilot"
+                  value={lastMission?.pilotIds?.[0] || "-"}
+                />
+                <Row label="Maintenance Events" value={maintenanceCount} />
+                <Row label="Current State" value={item.status || "-"} />
               </div>
 
-              {aircraftMissions.length > 0 && (
-                <>
-                  <div className="my-4 border-t border-green-900/40" />
-
-                  <p className="mb-2 text-xs uppercase tracking-wide text-slate-500">
+              {missionHistory.length > 0 && (
+                <div className="mt-5 border-t border-green-900/30 pt-4">
+                  <p className="mb-3 text-xs uppercase tracking-[0.18em] text-slate-500">
                     Mission History
                   </p>
 
                   <div className="flex flex-wrap gap-2">
-                    {aircraftMissions.map((mission) => (
+                    {missionHistory.map((mission) => (
                       <span
                         key={mission.id}
-                        className="rounded-lg border border-green-900/40 bg-green-500/10 px-2 py-1 text-xs text-green-300"
+                        className="rounded-lg border border-green-500/20 bg-green-500/10 px-3 py-1.5 text-xs text-green-200"
                       >
-                        {mission.name}
+                        {mission.name || mission.id}
                       </span>
                     ))}
                   </div>
-                </>
+                </div>
               )}
             </div>
           );

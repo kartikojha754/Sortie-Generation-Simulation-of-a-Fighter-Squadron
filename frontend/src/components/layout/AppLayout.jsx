@@ -1,22 +1,20 @@
-// src/components/layout/AppLayout.jsx
-
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 
 export default function AppLayout() {
   return (
-    <div className="min-h-screen bg-[#0B0F0D] text-slate-100">
-      <div className="flex">
+    <div className="min-h-screen bg-transparent text-slate-100">
+      <div className="flex min-h-screen">
         <Sidebar />
 
-        <main className="min-h-screen flex-1">
+        <div className="min-w-0 flex-1">
           <Topbar />
 
-          <div className="p-6">
+          <main className="relative mx-auto max-w-[1600px] px-5 py-7 lg:px-8">
             <Outlet />
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
     </div>
   );
