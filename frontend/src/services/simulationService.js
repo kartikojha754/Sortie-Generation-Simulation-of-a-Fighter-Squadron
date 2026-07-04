@@ -1,11 +1,20 @@
 import { runSimulationRequest } from "../api/simulationApi.js";
+
 export function prepareSimulationPayload(scenario) {
+  const pilotCount = Object.values(scenario.pilotLevels || {}).reduce(
+    (sum, count) => sum + Number(count || 0),
+    0,
+  );
+
   return {
     aircraftCount: scenario.aircraftCount,
-    pilotCount: scenario.pilotCount,
+    pilotCount,
     groundCrewCount: scenario.groundCrewCount,
     runwayCount: scenario.runwayCount,
     missionCount: scenario.missionCount,
+
+    pilotLevels: scenario.pilotLevels,
+    missionRequests: scenario.missionRequests || [],
 
     weatherCondition: scenario.weatherCondition,
     visibility: scenario.visibility,

@@ -1,15 +1,47 @@
-// src/context/ScenarioContext.jsx
-
 import { createContext, useContext, useState } from "react";
 
 const ScenarioContext = createContext(null);
 
 const defaultScenario = {
   aircraftCount: 6,
-  pilotCount: 6,
   groundCrewCount: 4,
   runwayCount: 2,
-  missionCount: 12,
+  missionCount: 5,
+
+  pilotLevels: {
+    TRAINEE: 2,
+    WINGMAN: 2,
+    FLIGHT_LEAD: 1,
+    FOUR_SHIP_LEAD: 0,
+    INSTRUCTOR: 1,
+  },
+
+  missionRequests: [
+    {
+      name: "Basic Handling Training",
+      type: "TRAINING",
+      priority: "LOW",
+      incomingTime: 60,
+      requiredPilotRating: "TRAINEE",
+      duration: 60,
+    },
+    {
+      name: "Air Combat Training",
+      type: "AIR_TO_AIR",
+      priority: "HIGH",
+      incomingTime: 20,
+      requiredPilotRating: "FLIGHT_LEAD",
+      duration: 90,
+    },
+    {
+      name: "Instructor Check Ride",
+      type: "TRAINING",
+      priority: "CRITICAL",
+      incomingTime: 100,
+      requiredPilotRating: "INSTRUCTOR",
+      duration: 120,
+    },
+  ],
 
   weatherCondition: "CLEAR",
   visibility: 10,
@@ -34,6 +66,67 @@ export function ScenarioProvider({ children }) {
     }));
   }
 
+  function updatePilotLevel(level, value) {
+    const numberValue = Number(value);
+    if (Number.isNaN(numberValue)) return;
+
+    setScenario((prev) => ({
+      ...prev,
+      pilotLevels: {
+        ...prev.pilotLevels,
+        [level]: Math.max(0, numberValue),
+      },
+    }));
+  }
+
+  function addMissionRequest() {
+    setScenario((prev) => ({
+      ...prev,
+      missionRequests: [
+        ...prev.missionRequests,
+        {
+          name: `Mission ${prev.missionRequests.length + 1}`,
+          type: "TRAINING",
+          priority: "MEDIUM",
+          incomingTime: 0,
+          requiredPilotRating: "WINGMAN",
+          duration: 90,
+        },
+      ],
+    }));
+  }
+
+  function updateMissionRequest(index, field, value) {
+    setScenario((prev) => ({
+      ...prev,
+      missionRequests: prev.missionRequests.map((mission, missionIndex) =>
+        missionIndex === index
+          ? {
+              ...mission,
+              [field]:
+                field === "incomingTime" || field === "duration"
+                  ? Math.max(0, Number(value))
+                  : value,
+            }
+          : mission,
+      ),
+    }));
+  }
+
+  function removeMissionRequest(index) {
+    setScenario((prev) => ({
+      ...prev,
+      missionRequests: prev.missionRequests.filter((_, i) => i !== index),
+    }));
+  }
+
+  function clearMissionRequests() {
+    setScenario((prev) => ({
+      ...prev,
+      missionRequests: [],
+    }));
+  }
+
   function resetScenario() {
     setScenario(defaultScenario);
   }
@@ -43,6 +136,11 @@ export function ScenarioProvider({ children }) {
       value={{
         scenario,
         updateScenarioField,
+        updatePilotLevel,
+        addMissionRequest,
+        updateMissionRequest,
+        removeMissionRequest,
+        clearMissionRequests,
         resetScenario,
       }}
     >

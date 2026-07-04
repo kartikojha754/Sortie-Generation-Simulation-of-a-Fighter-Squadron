@@ -1,7 +1,3 @@
-/**
- * Represents a simulation scenario.
- * A scenario defines the conditions under which the simulation runs.
- */
 class Scenario {
   constructor(data = {}) {
     this.id = data.id || null;
@@ -10,7 +6,15 @@ class Scenario {
 
     this.groundAbortRate = data.groundAbortRate || 0;
     this.airAbortRate = data.airAbortRate || 0;
+
     this.weatherAbortRate = data.weatherAbortRate || 0;
+    this.manualWeatherAbortRate = data.manualWeatherAbortRate || 0;
+    this.derivedWeatherAbortRate = data.derivedWeatherAbortRate || 0;
+    this.effectiveWeatherAbortRate =
+      data.effectiveWeatherAbortRate ?? this.weatherAbortRate;
+
+    this.weatherRiskLevel = data.weatherRiskLevel || "LOW";
+    this.weatherRiskReason = data.weatherRiskReason || "";
 
     this.availableAircraft = data.availableAircraft || 0;
     this.availablePilots = data.availablePilots || 0;
@@ -54,7 +58,13 @@ class Scenario {
 
       groundAbortRate: this.groundAbortRate,
       airAbortRate: this.airAbortRate,
+
       weatherAbortRate: this.weatherAbortRate,
+      manualWeatherAbortRate: this.manualWeatherAbortRate,
+      derivedWeatherAbortRate: this.derivedWeatherAbortRate,
+      effectiveWeatherAbortRate: this.effectiveWeatherAbortRate,
+      weatherRiskLevel: this.weatherRiskLevel,
+      weatherRiskReason: this.weatherRiskReason,
 
       availableAircraft: this.availableAircraft,
       availablePilots: this.availablePilots,

@@ -3,13 +3,16 @@ import Card from "../common/Card";
 import Button from "../common/Button";
 import { useScenario } from "../../context/ScenarioContext";
 import { useSimulation } from "../../context/SimulationContext";
+import { prepareSimulationPayload } from "../../services/simulationService";
 
 export default function RunSimulationPanel() {
   const navigate = useNavigate();
   const { scenario, resetScenario } = useScenario();
   const { executeSimulation, loading, error } = useSimulation();
 
-  const fieldCount = Object.keys(scenario).length;
+  const payload = prepareSimulationPayload(scenario);
+  const customMissionCount = payload.missionRequests?.length || 0;
+  const totalPilots = payload.pilotCount || 0;
 
   async function handleRunSimulation() {
     try {
@@ -33,7 +36,15 @@ export default function RunSimulationPanel() {
           </h3>
 
           <p className="mt-2 text-sm text-slate-400">
-            {fieldCount} backend-supported fields are configured and ready.
+            {totalPilots} pilots, {payload.aircraftCount} aircraft,{" "}
+            {payload.groundCrewCount} ground crew, {payload.runwayCount} runways
+            configured.
+          </p>
+
+          <p className="mt-1 text-xs text-slate-500">
+            {customMissionCount > 0
+              ? `${customMissionCount} custom mission request(s) will be sent to backend.`
+              : `${payload.missionCount} auto-generated mission(s) will be requested.`}
           </p>
 
           {error && <p className="mt-2 text-sm text-red-400">{error}</p>}

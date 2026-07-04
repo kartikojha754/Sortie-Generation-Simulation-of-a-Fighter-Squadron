@@ -11,8 +11,15 @@ const {
 const { entities, enums, constants } = require("../domain");
 
 const { Sortie } = entities;
-const { EventType } = enums;
+const { EventType, MissionStatus } = enums;
 const { SimulationConstants } = constants;
+
+const PRIORITY_WEIGHT = {
+  CRITICAL: 4,
+  HIGH: 3,
+  MEDIUM: 2,
+  LOW: 1,
+};
 
 class SimulationService {
   constructor() {
@@ -24,6 +31,8 @@ class SimulationService {
 
     this.sorties = [];
     this.maintenanceRecords = [];
+    this.pendingMissions = [];
+    this.schedulerLog = [];
   }
 
   runSimulation(input) {
@@ -31,6 +40,8 @@ class SimulationService {
 
     this.sorties = [];
     this.maintenanceRecords = [];
+    this.pendingMissions = [];
+    this.schedulerLog = [];
     this.statisticsCollector = new StatisticsCollector();
 
     const engine = new SimulationEngine();
@@ -44,6 +55,8 @@ class SimulationService {
       missions,
       sorties: this.sorties,
       maintenanceRecords: this.maintenanceRecords,
+      pendingMissions: this.pendingMissions,
+      schedulerLog: this.schedulerLog,
       statisticsCollector: this.statisticsCollector,
     };
 
@@ -52,8 +65,8 @@ class SimulationService {
     missions.forEach((mission) => {
       engine.scheduleEvent(
         EventFactory.createEvent({
-          type: EventType.MISSION_CREATED,
-          time: mission.scheduledStartTime || 0,
+          type: EventType.MISSION_ARRIVED,
+          time: mission.incomingTime || mission.scheduledStartTime || 0,
           entityId: mission.id,
           payload: { missionId: mission.id },
         }),
@@ -62,59 +75,64 @@ class SimulationService {
 
     engine.run(context);
 
+    this.abortUnscheduledMissions(context);
+
     return {
       scenario: scenario.toJSON(),
       statistics: this.statisticsCollector.getReport(),
       missions: missions.map((m) => m.toJSON()),
-      sorties: this.sorties.map((s) => s.toJSON()),
+      sorties: this.sorties
+        .sort((a, b) => (a.takeoffTime ?? 0) - (b.takeoffTime ?? 0))
+        .map((s) => s.toJSON()),
       maintenanceRecords: this.maintenanceRecords.map((m) => m.toJSON()),
+      schedulerLog: this.schedulerLog,
       finalSquadronState: squadron.toJSON(),
     };
   }
 
   registerHandlers(engine, context) {
-    engine.registerHandler(EventType.MISSION_CREATED, (event) => {
+    engine.registerHandler(EventType.MISSION_ARRIVED, (event) => {
       const mission = this.findMission(context.missions, event.entityId);
-
       if (!mission) return;
 
       context.statisticsCollector.recordMission();
 
-      const allocated = this.resourceAllocator.allocateResources(
-        mission,
-        context.squadron,
-      );
-
-      if (!allocated) {
+      if (
+        !this.resourceAllocator.canEverAssignMission(mission, context.squadron)
+      ) {
         mission.abort("RESOURCE_UNAVAILABLE");
         context.statisticsCollector.recordAbort("RESOURCE_UNAVAILABLE");
+
+        this.log(context, {
+          time: event.time,
+          type: "MISSION_ABORTED_PERMANENT_RESOURCE_GAP",
+          missionId: mission.id,
+          reason: "Required resource or qualified pilot does not exist.",
+        });
+
         return;
       }
 
-      const abortType = this.abortHandler.checkAbort(context.scenario);
+      mission.status = MissionStatus.WAITING_FOR_RESOURCES;
+      mission.queueEnteredTime = event.time;
 
-      if (abortType) {
-        mission.abort(abortType);
-        context.statisticsCollector.recordAbort(abortType);
-        this.releaseMissionResources(mission, context.squadron);
-        return;
-      }
+      context.pendingMissions.push(mission);
 
-      const planningTime = context.scenario.missionPlanningEnabled
-        ? SimulationConstants.DEFAULT_MISSION_PLANNING_TIME
-        : 0;
+      this.log(context, {
+        time: event.time,
+        type: "MISSION_ARRIVED",
+        missionId: mission.id,
+        priority: mission.priority,
+        requiredPilotRating: mission.requiredPilotRating,
+      });
 
-      engine.scheduleEvent(
-        EventFactory.createEvent({
-          type: EventType.MISSION_PLANNING_COMPLETED,
-          time: event.time + planningTime,
-          entityId: mission.id,
-          payload: { missionId: mission.id },
-        }),
-      );
+      this.tryDispatchPendingMissions(context, event.time);
     });
 
     engine.registerHandler(EventType.MISSION_PLANNING_COMPLETED, (event) => {
+      const mission = this.findMission(context.missions, event.entityId);
+      if (!mission || mission.status === MissionStatus.ABORTED) return;
+
       engine.scheduleEvent(
         EventFactory.createEvent({
           type: EventType.TAKEOFF,
@@ -130,7 +148,7 @@ class SimulationService {
 
     engine.registerHandler(EventType.TAKEOFF, (event) => {
       const mission = this.findMission(context.missions, event.entityId);
-      if (!mission) return;
+      if (!mission || mission.status === MissionStatus.ABORTED) return;
 
       const aircraft = this.findById(
         context.squadron.aircraft,
@@ -152,6 +170,15 @@ class SimulationService {
 
       const missionDuration =
         mission.duration || SimulationConstants.DEFAULT_SORTIE_DURATION;
+
+      this.log(context, {
+        time: event.time,
+        type: "SORTIE_TAKEOFF",
+        missionId: mission.id,
+        sortieId: sortie.id,
+        aircraftId: mission.aircraftIds[0],
+        pilotId: mission.pilotIds[0],
+      });
 
       engine.scheduleEvent(
         EventFactory.createEvent({
@@ -190,6 +217,17 @@ class SimulationService {
       if (pilot) {
         pilot.completeFlight(missionDuration / 60);
         pilot.release();
+
+        engine.scheduleEvent(
+          EventFactory.createEvent({
+            type: EventType.PILOT_REST_COMPLETED,
+            time: event.time + SimulationConstants.MIN_REST_TIME_AFTER_SORTIE,
+            entityId: pilot.id,
+            payload: {
+              pilotId: pilot.id,
+            },
+          }),
+        );
       }
 
       if (sortie) {
@@ -206,6 +244,13 @@ class SimulationService {
         if (crew) crew.release();
       });
 
+      this.log(context, {
+        time: event.time,
+        type: "SORTIE_LANDED",
+        missionId: mission.id,
+        sortieId: sortie?.id,
+      });
+
       if (aircraft) {
         const maintenanceResult = this.maintenanceScheduler.scheduleMaintenance(
           aircraft,
@@ -216,6 +261,8 @@ class SimulationService {
 
         engine.scheduleEvent(maintenanceResult.completionEvent);
       }
+
+      this.tryDispatchPendingMissions(context, event.time);
     });
 
     engine.registerHandler(EventType.MAINTENANCE_COMPLETED, (event) => {
@@ -235,8 +282,175 @@ class SimulationService {
           maintenance,
           event.time,
         );
+
+        this.log(context, {
+          time: event.time,
+          type: "AIRCRAFT_AVAILABLE_AFTER_MAINTENANCE",
+          aircraftId: aircraft.id,
+        });
       }
+
+      this.tryDispatchPendingMissions(context, event.time);
     });
+
+    engine.registerHandler(EventType.PILOT_REST_COMPLETED, (event) => {
+      const pilot = this.findById(
+        context.squadron.pilots,
+        event.payload.pilotId,
+      );
+
+      if (pilot) {
+        pilot.reduceRestTime(SimulationConstants.MIN_REST_TIME_AFTER_SORTIE);
+        pilot.release();
+
+        this.log(context, {
+          time: event.time,
+          type: "PILOT_AVAILABLE_AFTER_REST",
+          pilotId: pilot.id,
+        });
+      }
+
+      this.tryDispatchPendingMissions(context, event.time);
+    });
+  }
+
+  tryDispatchPendingMissions(context, currentTime) {
+    let dispatchedSomething = true;
+
+    while (dispatchedSomething) {
+      dispatchedSomething = false;
+
+      this.sortPendingMissions(context.pendingMissions);
+
+      for (let i = 0; i < context.pendingMissions.length; i++) {
+        const mission = context.pendingMissions[i];
+
+        if (
+          !this.resourceAllocator.canEverAssignMission(
+            mission,
+            context.squadron,
+          )
+        ) {
+          mission.abort("RESOURCE_UNAVAILABLE");
+          context.statisticsCollector.recordAbort("RESOURCE_UNAVAILABLE");
+
+          context.pendingMissions.splice(i, 1);
+          i--;
+
+          this.log(context, {
+            time: currentTime,
+            type: "MISSION_ABORTED_PERMANENT_RESOURCE_GAP",
+            missionId: mission.id,
+          });
+
+          continue;
+        }
+
+        if (!this.resourceAllocator.canAssignNow(mission, context.squadron)) {
+          this.log(context, {
+            time: currentTime,
+            type: "MISSION_WAITING_FOR_RESOURCES",
+            missionId: mission.id,
+            reason: "Resources are busy, resting, or under maintenance.",
+          });
+
+          continue;
+        }
+
+        const allocated = this.resourceAllocator.allocateResources(
+          mission,
+          context.squadron,
+        );
+
+        if (!allocated) {
+          continue;
+        }
+
+        context.pendingMissions.splice(i, 1);
+
+        const abortType = this.abortHandler.checkAbort(context.scenario);
+
+        if (abortType) {
+          mission.abort(abortType);
+          context.statisticsCollector.recordAbort(abortType);
+          this.releaseMissionResources(mission, context.squadron);
+
+          this.log(context, {
+            time: currentTime,
+            type: "MISSION_ABORTED_AFTER_ALLOCATION",
+            missionId: mission.id,
+            reason: abortType,
+          });
+
+          dispatchedSomething = true;
+          break;
+        }
+
+        const planningTime = context.scenario.missionPlanningEnabled
+          ? SimulationConstants.DEFAULT_MISSION_PLANNING_TIME
+          : 0;
+
+        const waitingTime =
+          currentTime - (mission.queueEnteredTime ?? mission.incomingTime);
+
+        mission.scheduledStartTime = currentTime;
+
+        this.log(context, {
+          time: currentTime,
+          type: "MISSION_DISPATCHED",
+          missionId: mission.id,
+          priority: mission.priority,
+          waitingTime,
+          aircraftId: mission.aircraftIds[0],
+          pilotId: mission.pilotIds[0],
+          runwayId: mission.runwayId,
+        });
+
+        context.engine.scheduleEvent(
+          EventFactory.createEvent({
+            type: EventType.MISSION_PLANNING_COMPLETED,
+            time: currentTime + planningTime,
+            entityId: mission.id,
+            payload: { missionId: mission.id },
+          }),
+        );
+
+        dispatchedSomething = true;
+        break;
+      }
+    }
+  }
+
+  sortPendingMissions(pendingMissions) {
+    pendingMissions.sort((a, b) => {
+      const priorityDifference =
+        (PRIORITY_WEIGHT[b.priority] || 0) - (PRIORITY_WEIGHT[a.priority] || 0);
+
+      if (priorityDifference !== 0) return priorityDifference;
+
+      const incomingDifference = (a.incomingTime || 0) - (b.incomingTime || 0);
+
+      if (incomingDifference !== 0) return incomingDifference;
+
+      return (a.duration || 0) - (b.duration || 0);
+    });
+  }
+
+  abortUnscheduledMissions(context) {
+    context.pendingMissions.forEach((mission) => {
+      mission.abort("SIMULATION_ENDED_BEFORE_RESOURCES_AVAILABLE");
+      context.statisticsCollector.recordAbort(
+        "SIMULATION_ENDED_BEFORE_RESOURCES_AVAILABLE",
+      );
+
+      this.log(context, {
+        time: context.engine.getCurrentTime(),
+        type: "MISSION_ABORTED_SIMULATION_ENDED",
+        missionId: mission.id,
+      });
+    });
+
+    context.pendingMissions.length = 0;
   }
 
   createSortieFromMission(mission, takeoffTime) {
@@ -289,6 +503,10 @@ class SimulationService {
 
     const runway = this.findById(squadron.runways, mission.runwayId);
     if (runway) runway.release();
+  }
+
+  log(context, entry) {
+    context.schedulerLog.push(entry);
   }
 }
 

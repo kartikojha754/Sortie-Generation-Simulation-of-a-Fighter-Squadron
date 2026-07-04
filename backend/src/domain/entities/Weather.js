@@ -1,93 +1,70 @@
 const { WeatherCondition } = require("../enums");
 
-/**
- * Represents the weather conditions for a simulation.
- * Weather affects whether sorties can be executed safely.
- */
 class Weather {
-    /**
-     * @param {Object} data
-     */
-    constructor(data = {}) {
+  constructor(data = {}) {
+    this.id = data.id || null;
+    this.condition = data.condition || WeatherCondition.CLEAR;
+    this.visibility = data.visibility ?? 10;
+    this.windSpeed = data.windSpeed ?? 5;
 
-        this.id = data.id || null;
+    this.isFlyable = data.isFlyable !== undefined ? data.isFlyable : true;
 
-        // Current weather condition
-        this.condition =
-            data.condition || WeatherCondition.CLEAR;
+    this.baseRisk = data.baseRisk ?? 0;
+    this.visibilityRisk = data.visibilityRisk ?? 0;
+    this.windRisk = data.windRisk ?? 0;
+    this.manualWeatherAbortRate = data.manualWeatherAbortRate ?? 0;
+    this.derivedWeatherAbortRate = data.derivedWeatherAbortRate ?? 0;
+    this.effectiveWeatherAbortRate = data.effectiveWeatherAbortRate ?? 0;
+    this.riskLevel = data.riskLevel || "LOW";
+    this.riskReason = data.riskReason || "";
+  }
 
-        // Visibility in kilometers
-        this.visibility =
-            data.visibility ?? 10;
+  canFly() {
+    return this.isFlyable;
+  }
 
-        // Wind speed in km/h
-        this.windSpeed =
-            data.windSpeed ?? 5;
+  updateCondition(condition) {
+    this.condition = condition;
+  }
 
-        // Whether flying is currently allowed
-        this.isFlyable =
-            data.isFlyable !== undefined
-                ? data.isFlyable
-                : true;
+  updateVisibility(visibility) {
+    if (visibility < 0) {
+      throw new Error("Visibility cannot be negative.");
     }
 
-    /**
-     * Returns true if aircraft are allowed to fly.
-     */
-    canFly() {
-        return this.isFlyable;
+    this.visibility = visibility;
+  }
+
+  updateWindSpeed(speed) {
+    if (speed < 0) {
+      throw new Error("Wind speed cannot be negative.");
     }
 
-    /**
-     * Updates weather condition.
-     */
-    updateCondition(condition) {
-        this.condition = condition;
-    }
+    this.windSpeed = speed;
+  }
 
-    /**
-     * Updates visibility.
-     */
-    updateVisibility(visibility) {
+  setFlyable(isFlyable) {
+    this.isFlyable = isFlyable;
+  }
 
-        if (visibility < 0) {
-            throw new Error("Visibility cannot be negative.");
-        }
+  toJSON() {
+    return {
+      id: this.id,
+      condition: this.condition,
+      visibility: this.visibility,
+      windSpeed: this.windSpeed,
+      isFlyable: this.isFlyable,
 
-        this.visibility = visibility;
-    }
-
-    /**
-     * Updates wind speed.
-     */
-    updateWindSpeed(speed) {
-
-        if (speed < 0) {
-            throw new Error("Wind speed cannot be negative.");
-        }
-
-        this.windSpeed = speed;
-    }
-
-    /**
-     * Enables or disables flying.
-     */
-    setFlyable(isFlyable) {
-        this.isFlyable = isFlyable;
-    }
-
-    /**
-     * Returns JSON representation.
-     */
-    toJSON() {
-        return {
-            id: this.id,
-            condition: this.condition,
-            visibility: this.visibility,
-            windSpeed: this.windSpeed,
-            isFlyable: this.isFlyable
-        };
-    }
+      baseRisk: this.baseRisk,
+      visibilityRisk: this.visibilityRisk,
+      windRisk: this.windRisk,
+      manualWeatherAbortRate: this.manualWeatherAbortRate,
+      derivedWeatherAbortRate: this.derivedWeatherAbortRate,
+      effectiveWeatherAbortRate: this.effectiveWeatherAbortRate,
+      riskLevel: this.riskLevel,
+      riskReason: this.riskReason,
+    };
+  }
 }
 
 module.exports = Weather;

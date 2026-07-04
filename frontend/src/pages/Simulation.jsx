@@ -4,7 +4,6 @@ import SimulationResultSummary from "../components/simulation/SimulationResultSu
 import MissionTable from "../components/simulation/MissionTable";
 import SquadronStateSummary from "../components/simulation/SquadronStateSummary";
 import MaintenanceRecordsTable from "../components/simulation/MaintenanceRecordsTable";
-import MissionTimeline from "../components/simulation/MissionTimeline";
 import AircraftStatusCards from "../components/simulation/AircraftStatusCards";
 import PilotStatusCards from "../components/simulation/PilotStatusCards";
 import GroundCrewStatusCards from "../components/simulation/GroundCrewStatusCards";
@@ -30,7 +29,6 @@ export default function Simulation() {
   }
 
   const resultData = simulationResult.data;
-  console.log(JSON.stringify(resultData.scenario, null, 2));
 
   return (
     <div>
@@ -43,28 +41,26 @@ export default function Simulation() {
       <div className="space-y-6">
         <SimulationResultSummary statistics={resultData.statistics} />
         <ScenarioSummary scenario={resultData.scenario} />
-
-        <MissionTimeline
-          missions={resultData.missions}
-          maintenanceRecords={resultData.maintenanceRecords}
-        />
-
         <MissionTable missions={resultData.missions} />
         <SortieTable sorties={resultData.sorties} />
         <SquadronStateSummary squadron={resultData.finalSquadronState} />
+
         <AircraftStatusCards
           aircraft={resultData.finalSquadronState?.aircraft}
           missions={resultData.missions}
           maintenanceRecords={resultData.maintenanceRecords}
         />
+
         <PilotStatusCards
           pilots={resultData.finalSquadronState?.pilots}
           missions={resultData.missions}
         />
+
         <GroundCrewStatusCards
           groundCrew={resultData.finalSquadronState?.groundCrew}
           missions={resultData.missions}
         />
+
         <MaintenanceRecordsTable records={resultData.maintenanceRecords} />
       </div>
     </div>

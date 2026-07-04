@@ -1,4 +1,5 @@
 const { entities, enums } = require("../domain");
+const WeatherRiskEvaluator = require("../simulation/services/WeatherRiskEvaluator");
 
 const { Aircraft, Pilot, GroundCrew, Runway, Weather, Squadron, Scenario } =
   entities;
@@ -27,6 +28,19 @@ function createCustomScenario(input = {}) {
     missionRequests.length > 0
       ? missionRequests.length
       : input.missionCount || 5;
+
+  const weatherInput = {
+    condition: input.weatherCondition || WeatherCondition.CLEAR,
+    visibility: input.visibility ?? 10,
+    windSpeed: input.windSpeed ?? 5,
+  };
+
+  const weatherRiskEvaluator = new WeatherRiskEvaluator();
+
+  const weatherRisk = weatherRiskEvaluator.evaluate(
+    weatherInput,
+    input.weatherAbortRate || 0,
+  );
 
   const squadron = new Squadron({
     id: input.squadronId || "SQ-CUSTOM",
@@ -82,10 +96,19 @@ function createCustomScenario(input = {}) {
   squadron.setWeather(
     new Weather({
       id: "W-CUSTOM",
-      condition: input.weatherCondition || WeatherCondition.CLEAR,
-      visibility: input.visibility || 10,
-      windSpeed: input.windSpeed || 5,
-      isFlyable: input.isFlyable !== undefined ? input.isFlyable : true,
+      condition: weatherRisk.condition,
+      visibility: weatherRisk.visibility,
+      windSpeed: weatherRisk.windSpeed,
+      isFlyable: weatherRisk.isFlyable,
+
+      baseRisk: weatherRisk.baseRisk,
+      visibilityRisk: weatherRisk.visibilityRisk,
+      windRisk: weatherRisk.windRisk,
+      manualWeatherAbortRate: weatherRisk.manualWeatherAbortRate,
+      derivedWeatherAbortRate: weatherRisk.derivedWeatherAbortRate,
+      effectiveWeatherAbortRate: weatherRisk.effectiveWeatherAbortRate,
+      riskLevel: weatherRisk.riskLevel,
+      riskReason: weatherRisk.riskReason,
     }),
   );
 
@@ -98,7 +121,13 @@ function createCustomScenario(input = {}) {
 
     groundAbortRate: input.groundAbortRate || 0,
     airAbortRate: input.airAbortRate || 0,
-    weatherAbortRate: input.weatherAbortRate || 0,
+
+    weatherAbortRate: weatherRisk.effectiveWeatherAbortRate,
+    manualWeatherAbortRate: weatherRisk.manualWeatherAbortRate,
+    derivedWeatherAbortRate: weatherRisk.derivedWeatherAbortRate,
+    effectiveWeatherAbortRate: weatherRisk.effectiveWeatherAbortRate,
+    weatherRiskLevel: weatherRisk.riskLevel,
+    weatherRiskReason: weatherRisk.riskReason,
 
     availableAircraft: aircraftCount,
     availablePilots: pilotCount,

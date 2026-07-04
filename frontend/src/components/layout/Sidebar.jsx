@@ -1,11 +1,10 @@
-// src/components/layout/Sidebar.jsx
-
 import { NavLink } from "react-router-dom";
 import {
   MdDashboard,
   MdBuild,
   MdOutlineScience,
   MdSettings,
+  MdTimeline,
 } from "react-icons/md";
 
 const navItems = [
@@ -23,6 +22,11 @@ const navItems = [
     label: "Simulation",
     path: "/simulation",
     icon: MdOutlineScience,
+  },
+  {
+    label: "Scheduler",
+    path: "/scheduler",
+    icon: MdTimeline,
   },
   {
     label: "Maintenance",

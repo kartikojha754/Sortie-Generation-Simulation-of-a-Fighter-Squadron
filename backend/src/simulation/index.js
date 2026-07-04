@@ -10,22 +10,24 @@ const MissionPlanner = require("./services/MissionPlanner");
 const ResourceAllocator = require("./services/ResourceAllocator");
 const AbortHandler = require("./services/AbortHandler");
 const WeatherManager = require("./services/WeatherManager");
+const WeatherRiskEvaluator = require("./services/WeatherRiskEvaluator");
 const MaintenanceScheduler = require("./services/MaintenanceScheduler");
 const StatisticsCollector = require("./services/StatisticsCollector");
 
 module.exports = {
-    SimulationClock,
-    EventQueue,
-    EventProcessor,
-    SimulationEngine,
+  SimulationClock,
+  EventQueue,
+  EventProcessor,
+  SimulationEngine,
 
-    SimulationEvent,
-    EventFactory,
+  SimulationEvent,
+  EventFactory,
 
-    MissionPlanner,
-    ResourceAllocator,
-    AbortHandler,
-    WeatherManager,
-    MaintenanceScheduler,
-    StatisticsCollector
+  MissionPlanner,
+  ResourceAllocator,
+  AbortHandler,
+  WeatherManager,
+  WeatherRiskEvaluator,
+  MaintenanceScheduler,
+  StatisticsCollector,
 };
