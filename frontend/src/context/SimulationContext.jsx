@@ -1,40 +1,66 @@
+// src/context/SimulationContext.jsx
+
 import { createContext, useContext, useState } from "react";
+import { runSimulation } from "../services/simulationService";
 
 const SimulationContext = createContext(null);
 
-export const SimulationProvider = ({ children }) => {
+export function SimulationProvider({ children }) {
   const [simulationResult, setSimulationResult] = useState(null);
-  const [latestSummary, setLatestSummary] = useState(null);
-  const [isSimulationRunning, setIsSimulationRunning] = useState(false);
-  const [simulationError, setSimulationError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const clearSimulationState = () => {
+  async function executeSimulation(scenario) {
+    try {
+      setLoading(true);
+      setError("");
+
+      const result = await runSimulation(scenario);
+
+      console.log("=== BACKEND RESPONSE ===");
+      console.log(result);
+
+      setSimulationResult(result);
+
+      return result;
+    } catch (err) {
+      console.error("=== SIMULATION ERROR ===");
+      console.error(err);
+
+      const message =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        "Failed to run simulation.";
+
+      setError(message);
+      throw new Error(message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function clearSimulation() {
     setSimulationResult(null);
-    setLatestSummary(null);
-    setSimulationError(null);
-    setIsSimulationRunning(false);
-  };
+    setError("");
+  }
 
   return (
     <SimulationContext.Provider
       value={{
         simulationResult,
-        setSimulationResult,
-        latestSummary,
-        setLatestSummary,
-        isSimulationRunning,
-        setIsSimulationRunning,
-        simulationError,
-        setSimulationError,
-        clearSimulationState,
+        loading,
+        error,
+        executeSimulation,
+        clearSimulation,
       }}
     >
       {children}
     </SimulationContext.Provider>
   );
-};
+}
 
-export const useSimulation = () => {
+export function useSimulation() {
   const context = useContext(SimulationContext);
 
   if (!context) {
@@ -42,4 +68,4 @@ export const useSimulation = () => {
   }
 
   return context;
-};
+}

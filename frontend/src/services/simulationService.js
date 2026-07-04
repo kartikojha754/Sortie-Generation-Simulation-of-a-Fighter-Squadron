@@ -1,23 +1,27 @@
-import { simulationApi } from "../api/simulationApi";
+import { runSimulationRequest } from "../api/simulationApi.js";
+export function prepareSimulationPayload(scenario) {
+  return {
+    aircraftCount: scenario.aircraftCount,
+    pilotCount: scenario.pilotCount,
+    groundCrewCount: scenario.groundCrewCount,
+    runwayCount: scenario.runwayCount,
+    missionCount: scenario.missionCount,
 
-export const simulationService = {
-  runScenario: async (scenarioPayload) => {
-    const response = await simulationApi.runCustomSimulation(scenarioPayload);
+    weatherCondition: scenario.weatherCondition,
+    visibility: scenario.visibility,
+    windSpeed: scenario.windSpeed,
 
-    return {
-      success: response.success,
-      message: response.message,
-      data: response.data,
-    };
-  },
+    groundAbortRate: scenario.groundAbortRate,
+    airAbortRate: scenario.airAbortRate,
+    weatherAbortRate: scenario.weatherAbortRate,
 
-  runScenarioSummary: async (scenarioPayload) => {
-    const response = await simulationApi.runCustomSummary(scenarioPayload);
+    randomScheduling: scenario.randomScheduling,
+    missionPlanningEnabled: scenario.missionPlanningEnabled,
+    simulationDuration: scenario.simulationDuration,
+  };
+}
 
-    return {
-      success: response.success,
-      message: response.message,
-      data: response.data,
-    };
-  },
-};
+export async function runSimulation(scenario) {
+  const payload = prepareSimulationPayload(scenario);
+  return await runSimulationRequest(payload);
+}

@@ -1,52 +1,57 @@
-import { createContext, useContext, useState } from "react";
+// src/context/ScenarioContext.jsx
 
-import { defaultScenario } from "../utils/defaultScenario";
-import { updateScenarioSection } from "../utils/updateScenarioSection";
+import { createContext, useContext, useState } from "react";
 
 const ScenarioContext = createContext(null);
 
-export const ScenarioProvider = ({ children }) => {
+const defaultScenario = {
+  aircraftCount: 6,
+  pilotCount: 6,
+  groundCrewCount: 4,
+  runwayCount: 2,
+  missionCount: 12,
+
+  weatherCondition: "CLEAR",
+  visibility: 10,
+  windSpeed: 5,
+
+  groundAbortRate: 0,
+  airAbortRate: 0,
+  weatherAbortRate: 0,
+
+  randomScheduling: false,
+  missionPlanningEnabled: true,
+  simulationDuration: 1440,
+};
+
+export function ScenarioProvider({ children }) {
   const [scenario, setScenario] = useState(defaultScenario);
 
-  const updateScenarioField = (parentKey, sectionName, fieldName, value) => {
-    setScenario((currentScenario) =>
-      updateScenarioSection(
-        currentScenario,
-        parentKey,
-        sectionName,
-        fieldName,
-        value,
-      ),
-    );
-  };
-
-  const updateMissionCount = (value) => {
-    setScenario((currentScenario) => ({
-      ...currentScenario,
-      missionCount: value,
+  function updateScenarioField(field, value) {
+    setScenario((prev) => ({
+      ...prev,
+      [field]: value,
     }));
-  };
+  }
 
-  const resetScenario = () => {
+  function resetScenario() {
     setScenario(defaultScenario);
-  };
+  }
 
   return (
     <ScenarioContext.Provider
       value={{
         scenario,
-        setScenario,
         updateScenarioField,
-        updateMissionCount,
         resetScenario,
       }}
     >
       {children}
     </ScenarioContext.Provider>
   );
-};
+}
 
-export const useScenario = () => {
+export function useScenario() {
   const context = useContext(ScenarioContext);
 
   if (!context) {
@@ -54,4 +59,4 @@ export const useScenario = () => {
   }
 
   return context;
-};
+}

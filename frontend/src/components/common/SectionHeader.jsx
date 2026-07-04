@@ -1,35 +1,19 @@
-function SectionHeader({ eyebrow, title, subtitle, icon, action }) {
+// src/components/common/SectionHeader.jsx
+
+export default function SectionHeader({ eyebrow, title, description }) {
   return (
-    <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-      <div className="flex items-start gap-3">
-        {icon && (
-          <div className="mt-1 flex h-10 w-10 items-center justify-center rounded-xl border border-sky-500/30 bg-sky-500/10 text-xl text-sky-400">
-            {icon}
-          </div>
-        )}
+    <div className="mb-5">
+      {eyebrow && (
+        <p className="text-xs uppercase tracking-[0.25em] text-green-400">
+          {eyebrow}
+        </p>
+      )}
 
-        <div>
-          {eyebrow && (
-            <p className="mb-1 text-xs font-semibold uppercase tracking-[0.25em] text-sky-400">
-              {eyebrow}
-            </p>
-          )}
+      <h2 className="mt-1 text-2xl font-bold text-slate-100">{title}</h2>
 
-          <h2 className="text-2xl font-bold tracking-tight text-white">
-            {title}
-          </h2>
-
-          {subtitle && (
-            <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-400">
-              {subtitle}
-            </p>
-          )}
-        </div>
-      </div>
-
-      {action && <div>{action}</div>}
+      {description && (
+        <p className="mt-2 max-w-2xl text-sm text-slate-400">{description}</p>
+      )}
     </div>
   );
 }
-
-export default SectionHeader;
