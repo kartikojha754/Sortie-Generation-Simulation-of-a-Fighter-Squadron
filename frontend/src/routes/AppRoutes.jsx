@@ -5,6 +5,7 @@ import ScenarioBuilder from "../pages/ScenarioBuilder";
 import Simulation from "../pages/Simulation";
 import SchedulerTimeline from "../pages/SchedulerTimeline";
 import Maintenance from "../pages/Maintenance";
+import History from "../pages/History";
 
 export default function AppRoutes() {
   return (
@@ -16,6 +17,7 @@ export default function AppRoutes() {
         <Route path="simulation" element={<Simulation />} />
         <Route path="scheduler" element={<SchedulerTimeline />} />
         <Route path="maintenance" element={<Maintenance />} />
+        <Route path="history" element={<History />} />
       </Route>
     </Routes>
   );

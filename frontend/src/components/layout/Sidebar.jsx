@@ -5,6 +5,7 @@ import {
   MdOutlineScience,
   MdSettings,
   MdTimeline,
+  MdHistory,
 } from "react-icons/md";
 
 const navItems = [
@@ -33,6 +34,11 @@ const navItems = [
     path: "/maintenance",
     icon: MdSettings,
   },
+  {
+    label: "History",
+    path: "/history",
+    icon: MdHistory,
+  },
 ];
 
 export default function Sidebar() {
@@ -42,6 +48,7 @@ export default function Sidebar() {
         <h1 className="text-xl font-bold tracking-wide text-green-400">
           SORTIE OPS
         </h1>
+
         <p className="mt-1 text-sm text-slate-400">
           Tactical Simulation Console
         </p>

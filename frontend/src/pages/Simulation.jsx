@@ -40,7 +40,10 @@ export default function Simulation() {
 
       <div className="space-y-6">
         <SimulationResultSummary statistics={resultData.statistics} />
-        <ScenarioSummary scenario={resultData.scenario} />
+        <ScenarioSummary
+          scenario={resultData.scenario}
+          weather={resultData.finalSquadronState?.weather}
+        />
         <MissionTable missions={resultData.missions} />
         <SortieTable sorties={resultData.sorties} />
         <SquadronStateSummary squadron={resultData.finalSquadronState} />

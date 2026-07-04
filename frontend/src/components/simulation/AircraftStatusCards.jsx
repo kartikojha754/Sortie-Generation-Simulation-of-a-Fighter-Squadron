@@ -21,6 +21,16 @@ function pretty(status) {
   return status?.replaceAll("_", " ") ?? "-";
 }
 
+function formatFlightHours(value) {
+  if (value === undefined || value === null) return "0 hrs";
+
+  const hours = Number(value);
+
+  if (Number.isNaN(hours)) return "0 hrs";
+
+  return `${hours.toFixed(2)} hrs`;
+}
+
 export default function AircraftStatusCards({
   aircraft = [],
   missions = [],
@@ -90,7 +100,7 @@ export default function AircraftStatusCards({
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-slate-500">Flight Hours</span>
-                  <span>{ac.flightHours}</span>
+                  <span>{formatFlightHours(ac.flightHours)}</span>
                 </div>
 
                 <div className="flex justify-between">
