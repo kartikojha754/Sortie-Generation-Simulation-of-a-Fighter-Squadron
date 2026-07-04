@@ -2,105 +2,73 @@
  * Represents a simulation scenario.
  * A scenario defines the conditions under which the simulation runs.
  */
-
 class Scenario {
+  constructor(data = {}) {
+    this.id = data.id || null;
+    this.name = data.name || "";
+    this.description = data.description || "";
 
-    /**
-     * @param {Object} data
-     */
-    constructor(data = {}) {
+    this.groundAbortRate = data.groundAbortRate || 0;
+    this.airAbortRate = data.airAbortRate || 0;
+    this.weatherAbortRate = data.weatherAbortRate || 0;
 
-        this.id = data.id || null;
+    this.availableAircraft = data.availableAircraft || 0;
+    this.availablePilots = data.availablePilots || 0;
+    this.availableGroundCrew = data.availableGroundCrew || 0;
+    this.availableRunways = data.availableRunways || 0;
 
-        this.name = data.name || "";
+    this.randomScheduling = data.randomScheduling || false;
 
-        this.description = data.description || "";
+    this.missionPlanningEnabled =
+      data.missionPlanningEnabled !== undefined
+        ? data.missionPlanningEnabled
+        : true;
 
-        // Abort probabilities (0.0 - 1.0)
-        this.groundAbortRate =
-            data.groundAbortRate || 0;
+    this.simulationDuration = data.simulationDuration || 1440;
 
-        this.airAbortRate =
-            data.airAbortRate || 0;
+    this.missionRequests = data.missionRequests || [];
+    this.pilotLevels = data.pilotLevels || {};
+  }
 
-        this.weatherAbortRate =
-            data.weatherAbortRate || 0;
+  enableRandomScheduling() {
+    this.randomScheduling = true;
+  }
 
-        // Available resources
-        this.availableAircraft =
-            data.availableAircraft || 0;
+  disableRandomScheduling() {
+    this.randomScheduling = false;
+  }
 
-        this.availablePilots =
-            data.availablePilots || 0;
+  enableMissionPlanning() {
+    this.missionPlanningEnabled = true;
+  }
 
-        this.availableGroundCrew =
-            data.availableGroundCrew || 0;
+  disableMissionPlanning() {
+    this.missionPlanningEnabled = false;
+  }
 
-        this.availableRunways =
-            data.availableRunways || 0;
+  toJSON() {
+    return {
+      id: this.id,
+      name: this.name,
+      description: this.description,
 
-        // Scheduling options
-        this.randomScheduling =
-            data.randomScheduling || false;
+      groundAbortRate: this.groundAbortRate,
+      airAbortRate: this.airAbortRate,
+      weatherAbortRate: this.weatherAbortRate,
 
-        this.missionPlanningEnabled =
-            data.missionPlanningEnabled !== undefined
-                ? data.missionPlanningEnabled
-                : true;
+      availableAircraft: this.availableAircraft,
+      availablePilots: this.availablePilots,
+      availableGroundCrew: this.availableGroundCrew,
+      availableRunways: this.availableRunways,
 
-        // Simulation duration (minutes)
-        this.simulationDuration =
-            data.simulationDuration || 1440;
-    }
+      randomScheduling: this.randomScheduling,
+      missionPlanningEnabled: this.missionPlanningEnabled,
+      simulationDuration: this.simulationDuration,
 
-    /**
-     * Enables random scheduling.
-     */
-    enableRandomScheduling() {
-        this.randomScheduling = true;
-    }
-
-    /**
-     * Disables random scheduling.
-     */
-    disableRandomScheduling() {
-        this.randomScheduling = false;
-    }
-
-    /**
-     * Enables mission planning.
-     */
-    enableMissionPlanning() {
-        this.missionPlanningEnabled = true;
-    }
-
-    /**
-     * Disables mission planning.
-     */
-    disableMissionPlanning() {
-        this.missionPlanningEnabled = false;
-    }
-
-    /**
-     * JSON representation.
-     */
-    toJSON() {
-        return {
-            id: this.id,
-            name: this.name,
-            description: this.description,
-            groundAbortRate: this.groundAbortRate,
-            airAbortRate: this.airAbortRate,
-            weatherAbortRate: this.weatherAbortRate,
-            availableAircraft: this.availableAircraft,
-            availablePilots: this.availablePilots,
-            availableGroundCrew: this.availableGroundCrew,
-            availableRunways: this.availableRunways,
-            randomScheduling: this.randomScheduling,
-            missionPlanningEnabled: this.missionPlanningEnabled,
-            simulationDuration: this.simulationDuration
-        };
-    }
+      missionRequests: this.missionRequests,
+      pilotLevels: this.pilotLevels,
+    };
+  }
 }
 
 module.exports = Scenario;

@@ -1,115 +1,91 @@
 const { EventType } = require("../enums");
 
-/**
- * Represents a sortie generated from a mission.
- * A sortie records the execution details of a mission.
- */
 class Sortie {
+  constructor(data = {}) {
+    this.id = data.id || null;
 
-    /**
-     * @param {Object} data
-     */
-    constructor(data = {}) {
+    this.missionId = data.missionId || null;
+    this.missionName = data.missionName || "";
+    this.missionType = data.missionType || null;
+    this.priority = data.priority || null;
 
-        this.id = data.id || null;
+    this.aircraftId = data.aircraftId || null;
+    this.pilotId = data.pilotId || null;
+    this.groundCrewIds = data.groundCrewIds || [];
+    this.runwayId = data.runwayId || null;
 
-        // Mission associated with this sortie
-        this.missionId = data.missionId || null;
+    this.requiredPilotRating = data.requiredPilotRating || null;
 
-        // Aircraft flown
-        this.aircraftId = data.aircraftId || null;
+    this.takeoffTime = data.takeoffTime ?? null;
+    this.landingTime = data.landingTime ?? null;
 
-        // Pilot flying
-        this.pilotId = data.pilotId || null;
+    this.plannedDuration = data.plannedDuration || 0;
+    this.actualDuration = data.actualDuration || null;
 
-        // Actual timings
-        this.takeoffTime = data.takeoffTime || null;
+    this.successful = data.successful !== undefined ? data.successful : false;
 
-        this.landingTime = data.landingTime || null;
+    this.events = data.events || [];
+  }
 
-        // Events generated during sortie
-        this.events = data.events || [];
+  recordTakeoff(time) {
+    this.takeoffTime = time;
 
-        // Final outcome
-        this.successful =
-            data.successful !== undefined
-                ? data.successful
-                : false;
+    this.events.push({
+      type: EventType.TAKEOFF,
+      time,
+    });
+  }
+
+  recordLanding(time) {
+    this.landingTime = time;
+
+    this.events.push({
+      type: EventType.LANDING,
+      time,
+    });
+
+    if (this.takeoffTime !== null && this.landingTime !== null) {
+      this.actualDuration = this.landingTime - this.takeoffTime;
     }
+  }
 
-    /**
-     * Record takeoff.
-     */
-    recordTakeoff(time = new Date()) {
-        this.takeoffTime = time;
+  addEvent(type, time, details = {}) {
+    this.events.push({
+      type,
+      time,
+      details,
+    });
+  }
 
-        this.events.push({
-            type: EventType.TAKEOFF,
-            time
-        });
-    }
+  markSuccessful() {
+    this.successful = true;
+  }
 
-    /**
-     * Record landing.
-     */
-    recordLanding(time = new Date()) {
-        this.landingTime = time;
+  toJSON() {
+    return {
+      id: this.id,
+      missionId: this.missionId,
+      missionName: this.missionName,
+      missionType: this.missionType,
+      priority: this.priority,
 
-        this.events.push({
-            type: EventType.LANDING,
-            time
-        });
-    }
+      aircraftId: this.aircraftId,
+      pilotId: this.pilotId,
+      groundCrewIds: this.groundCrewIds,
+      runwayId: this.runwayId,
 
-    /**
-     * Record any simulation event.
-     */
-    addEvent(type, details = {}) {
+      requiredPilotRating: this.requiredPilotRating,
 
-        this.events.push({
-            type,
-            time: new Date(),
-            details
-        });
-    }
+      takeoffTime: this.takeoffTime,
+      landingTime: this.landingTime,
 
-    /**
-     * Mark sortie successful.
-     */
-    markSuccessful() {
-        this.successful = true;
-    }
+      plannedDuration: this.plannedDuration,
+      actualDuration: this.actualDuration,
 
-    /**
-     * Returns sortie duration in minutes.
-     */
-    getDuration() {
-
-        if (!this.takeoffTime || !this.landingTime)
-            return null;
-
-        return (
-            (this.landingTime - this.takeoffTime) /
-            (1000 * 60)
-        );
-    }
-
-    /**
-     * JSON representation.
-     */
-    toJSON() {
-        return {
-            id: this.id,
-            missionId: this.missionId,
-            aircraftId: this.aircraftId,
-            pilotId: this.pilotId,
-            takeoffTime: this.takeoffTime,
-            landingTime: this.landingTime,
-            successful: this.successful,
-            duration: this.getDuration(),
-            events: this.events
-        };
-    }
+      successful: this.successful,
+      events: this.events,
+    };
+  }
 }
 
 module.exports = Sortie;

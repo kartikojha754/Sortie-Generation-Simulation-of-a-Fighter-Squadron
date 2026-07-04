@@ -7,10 +7,26 @@ const { PilotRating, WeatherCondition } = enums;
 
 function createCustomScenario(input = {}) {
   const aircraftCount = input.aircraftCount || 6;
-  const pilotCount = input.pilotCount || 6;
   const groundCrewCount = input.groundCrewCount || 4;
   const runwayCount = input.runwayCount || 2;
-  const missionCount = input.missionCount || 5;
+
+  const pilotLevels = input.pilotLevels || {
+    [PilotRating.WINGMAN]: input.pilotCount || 6,
+  };
+
+  const pilotCount = Object.values(pilotLevels).reduce(
+    (sum, count) => sum + Number(count || 0),
+    0,
+  );
+
+  const missionRequests = Array.isArray(input.missionRequests)
+    ? input.missionRequests
+    : [];
+
+  const missionCount =
+    missionRequests.length > 0
+      ? missionRequests.length
+      : input.missionCount || 5;
 
   const squadron = new Squadron({
     id: input.squadronId || "SQ-CUSTOM",
@@ -27,16 +43,22 @@ function createCustomScenario(input = {}) {
     );
   }
 
-  for (let i = 1; i <= pilotCount; i++) {
-    squadron.addPilot(
-      new Pilot({
-        id: `P-${i}`,
-        name: `Pilot ${i}`,
-        rank: "Officer",
-        rating: PilotRating.WINGMAN,
-      }),
-    );
-  }
+  let pilotIndex = 1;
+
+  Object.entries(pilotLevels).forEach(([rating, count]) => {
+    for (let i = 1; i <= Number(count); i++) {
+      squadron.addPilot(
+        new Pilot({
+          id: `P-${pilotIndex}`,
+          name: `${rating} Pilot ${i}`,
+          rank: "Officer",
+          rating,
+        }),
+      );
+
+      pilotIndex++;
+    }
+  });
 
   for (let i = 1; i <= groundCrewCount; i++) {
     squadron.addGroundCrew(
@@ -91,6 +113,9 @@ function createCustomScenario(input = {}) {
         : true,
 
     simulationDuration: input.simulationDuration || 1440,
+
+    missionRequests,
+    pilotLevels,
   });
 
   return {

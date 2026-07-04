@@ -8,7 +8,9 @@ const {
   StatisticsCollector,
 } = require("../simulation");
 
-const { enums, constants } = require("../domain");
+const { entities, enums, constants } = require("../domain");
+
+const { Sortie } = entities;
 const { EventType } = enums;
 const { SimulationConstants } = constants;
 
@@ -26,6 +28,10 @@ class SimulationService {
 
   runSimulation(input) {
     const { squadron, scenario, missionCount } = input;
+
+    this.sorties = [];
+    this.maintenanceRecords = [];
+    this.statisticsCollector = new StatisticsCollector();
 
     const engine = new SimulationEngine();
 
@@ -141,12 +147,21 @@ class SimulationService {
 
       mission.start(event.time);
 
+      const sortie = this.createSortieFromMission(mission, event.time);
+      context.sorties.push(sortie);
+
+      const missionDuration =
+        mission.duration || SimulationConstants.DEFAULT_SORTIE_DURATION;
+
       engine.scheduleEvent(
         EventFactory.createEvent({
           type: EventType.LANDING,
-          time: event.time + SimulationConstants.DEFAULT_SORTIE_DURATION,
+          time: event.time + missionDuration,
           entityId: mission.id,
-          payload: { missionId: mission.id },
+          payload: {
+            missionId: mission.id,
+            sortieId: sortie.id,
+          },
         }),
       );
     });
@@ -162,15 +177,24 @@ class SimulationService {
 
       const pilot = this.findById(context.squadron.pilots, mission.pilotIds[0]);
 
+      const sortie = this.findById(context.sorties, event.payload.sortieId);
+
+      const missionDuration =
+        mission.duration || SimulationConstants.DEFAULT_SORTIE_DURATION;
+
       if (aircraft) {
         aircraft.land();
-        aircraft.addFlightHours(
-          SimulationConstants.DEFAULT_SORTIE_DURATION / 60,
-        );
+        aircraft.addFlightHours(missionDuration / 60);
       }
 
       if (pilot) {
-        pilot.completeFlight(SimulationConstants.DEFAULT_SORTIE_DURATION / 60);
+        pilot.completeFlight(missionDuration / 60);
+        pilot.release();
+      }
+
+      if (sortie) {
+        sortie.recordLanding(event.time);
+        sortie.markSuccessful();
       }
 
       mission.complete(event.time);
@@ -213,6 +237,30 @@ class SimulationService {
         );
       }
     });
+  }
+
+  createSortieFromMission(mission, takeoffTime) {
+    const sortie = new Sortie({
+      id: `SOR-${mission.id}`,
+      missionId: mission.id,
+      missionName: mission.name,
+      missionType: mission.type,
+      priority: mission.priority,
+
+      aircraftId: mission.aircraftIds[0],
+      pilotId: mission.pilotIds[0],
+      groundCrewIds: mission.groundCrewIds,
+      runwayId: mission.runwayId,
+
+      requiredPilotRating: mission.requiredPilotRating,
+
+      plannedDuration:
+        mission.duration || SimulationConstants.DEFAULT_SORTIE_DURATION,
+    });
+
+    sortie.recordTakeoff(takeoffTime);
+
+    return sortie;
   }
 
   findMission(missions, missionId) {
