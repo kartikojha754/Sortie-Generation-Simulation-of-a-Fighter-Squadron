@@ -1,0 +1,1308 @@
+[
+  {
+    "_id": "1783618447405-k6myujc9",
+    "simulationNumber": 1,
+    "source": "custom",
+    "scenarioName": "Custom Scenario",
+    "requestPayload": {
+      "aircraftCount": 6,
+      "pilotCount": 6,
+      "groundCrewCount": 4,
+      "runwayCount": 2,
+      "missionCount": 5,
+      "pilotLevels": {
+        "TRAINEE": 2,
+        "WINGMAN": 2,
+        "FLIGHT_LEAD": 1,
+        "FOUR_SHIP_LEAD": 0,
+        "INSTRUCTOR": 1
+      },
+      "missionRequests": [
+        {
+          "name": "Basic Handling Training",
+          "type": "TRAINING",
+          "priority": "LOW",
+          "incomingTime": 60,
+          "requiredPilotRating": "TRAINEE",
+          "duration": 60
+        },
+        {
+          "name": "Air Combat Training",
+          "type": "AIR_TO_AIR",
+          "priority": "HIGH",
+          "incomingTime": 20,
+          "requiredPilotRating": "FLIGHT_LEAD",
+          "duration": 90
+        },
+        {
+          "name": "Instructor Check Ride",
+          "type": "TRAINING",
+          "priority": "CRITICAL",
+          "incomingTime": 100,
+          "requiredPilotRating": "INSTRUCTOR",
+          "duration": 120
+        }
+      ],
+      "weatherCondition": "CLEAR",
+      "visibility": 10,
+      "windSpeed": 5,
+      "groundAbortRate": 0,
+      "airAbortRate": 0,
+      "weatherAbortRate": 0,
+      "randomScheduling": false,
+      "missionPlanningEnabled": true,
+      "simulationDuration": 1440
+    },
+    "summary": {
+      "totalMissions": 3,
+      "completedSorties": 3,
+      "abortedMissions": 0,
+      "groundAborts": 0,
+      "airAborts": 0,
+      "weatherAborts": 0,
+      "successRate": 1,
+      "aircraftCount": 6,
+      "pilotCount": 6,
+      "groundCrewCount": 4,
+      "runwayCount": 2,
+      "weatherCondition": "CLEAR",
+      "visibility": 10,
+      "windSpeed": 5,
+      "weatherRiskLevel": "LOW",
+      "weatherAbortRate": 0.02,
+      "missionCount": 3,
+      "sortieCount": 3,
+      "maintenanceCount": 3,
+      "schedulerEventCount": 18
+    },
+    "result": {
+      "scenario": {
+        "id": "SC-CUSTOM",
+        "name": "Custom Scenario",
+        "description": "User-defined sortie generation simulation scenario.",
+        "groundAbortRate": 0,
+        "airAbortRate": 0,
+        "weatherAbortRate": 0.02,
+        "manualWeatherAbortRate": 0,
+        "derivedWeatherAbortRate": 0.02,
+        "effectiveWeatherAbortRate": 0.02,
+        "weatherRiskLevel": "LOW",
+        "weatherRiskReason": "CLEAR conditions with 10 km visibility and 5 wind speed produce a 2% effective weather abort risk.",
+        "availableAircraft": 6,
+        "availablePilots": 6,
+        "availableGroundCrew": 4,
+        "availableRunways": 2,
+        "randomScheduling": false,
+        "missionPlanningEnabled": true,
+        "simulationDuration": 1440,
+        "missionRequests": [
+          {
+            "name": "Basic Handling Training",
+            "type": "TRAINING",
+            "priority": "LOW",
+            "incomingTime": 60,
+            "requiredPilotRating": "TRAINEE",
+            "duration": 60
+          },
+          {
+            "name": "Air Combat Training",
+            "type": "AIR_TO_AIR",
+            "priority": "HIGH",
+            "incomingTime": 20,
+            "requiredPilotRating": "FLIGHT_LEAD",
+            "duration": 90
+          },
+          {
+            "name": "Instructor Check Ride",
+            "type": "TRAINING",
+            "priority": "CRITICAL",
+            "incomingTime": 100,
+            "requiredPilotRating": "INSTRUCTOR",
+            "duration": 120
+          }
+        ],
+        "pilotLevels": {
+          "TRAINEE": 2,
+          "WINGMAN": 2,
+          "FLIGHT_LEAD": 1,
+          "FOUR_SHIP_LEAD": 0,
+          "INSTRUCTOR": 1
+        }
+      },
+      "statistics": {
+        "totalMissions": 3,
+        "completedSorties": 3,
+        "abortedMissions": 0,
+        "groundAborts": 0,
+        "airAborts": 0,
+        "weatherAborts": 0,
+        "successRate": 1
+      },
+      "missions": [
+        {
+          "id": "MIS-1",
+          "name": "Basic Handling Training",
+          "type": "TRAINING",
+          "priority": "LOW",
+          "status": "COMPLETED",
+          "aircraftIds": [
+            "AC-2"
+          ],
+          "pilotIds": [
+            "P-1"
+          ],
+          "groundCrewIds": [
+            "GC-2"
+          ],
+          "runwayId": "RW-2",
+          "incomingTime": 60,
+          "scheduledStartTime": 60,
+          "actualStartTime": 135,
+          "endTime": 195,
+          "requiredPilotRating": "TRAINEE",
+          "duration": 60,
+          "abortReason": null,
+          "isCompleted": true
+        },
+        {
+          "id": "MIS-2",
+          "name": "Air Combat Training",
+          "type": "AIR_TO_AIR",
+          "priority": "HIGH",
+          "status": "COMPLETED",
+          "aircraftIds": [
+            "AC-1"
+          ],
+          "pilotIds": [
+            "P-5"
+          ],
+          "groundCrewIds": [
+            "GC-1"
+          ],
+          "runwayId": "RW-1",
+          "incomingTime": 20,
+          "scheduledStartTime": 20,
+          "actualStartTime": 95,
+          "endTime": 185,
+          "requiredPilotRating": "FLIGHT_LEAD",
+          "duration": 90,
+          "abortReason": null,
+          "isCompleted": true
+        },
+        {
+          "id": "MIS-3",
+          "name": "Instructor Check Ride",
+          "type": "TRAINING",
+          "priority": "CRITICAL",
+          "status": "COMPLETED",
+          "aircraftIds": [
+            "AC-3"
+          ],
+          "pilotIds": [
+            "P-6"
+          ],
+          "groundCrewIds": [
+            "GC-3"
+          ],
+          "runwayId": "RW-1",
+          "incomingTime": 100,
+          "scheduledStartTime": 100,
+          "actualStartTime": 175,
+          "endTime": 295,
+          "requiredPilotRating": "INSTRUCTOR",
+          "duration": 120,
+          "abortReason": null,
+          "isCompleted": true
+        }
+      ],
+      "sorties": [
+        {
+          "id": "SOR-MIS-2",
+          "missionId": "MIS-2",
+          "missionName": "Air Combat Training",
+          "missionType": "AIR_TO_AIR",
+          "priority": "HIGH",
+          "aircraftId": "AC-1",
+          "pilotId": "P-5",
+          "groundCrewIds": [
+            "GC-1"
+          ],
+          "runwayId": "RW-1",
+          "requiredPilotRating": "FLIGHT_LEAD",
+          "takeoffTime": 95,
+          "landingTime": 185,
+          "plannedDuration": 90,
+          "actualDuration": 90,
+          "successful": true,
+          "events": [
+            {
+              "type": "TAKEOFF",
+              "time": 95
+            },
+            {
+              "type": "LANDING",
+              "time": 185
+            }
+          ]
+        },
+        {
+          "id": "SOR-MIS-1",
+          "missionId": "MIS-1",
+          "missionName": "Basic Handling Training",
+          "missionType": "TRAINING",
+          "priority": "LOW",
+          "aircraftId": "AC-2",
+          "pilotId": "P-1",
+          "groundCrewIds": [
+            "GC-2"
+          ],
+          "runwayId": "RW-2",
+          "requiredPilotRating": "TRAINEE",
+          "takeoffTime": 135,
+          "landingTime": 195,
+          "plannedDuration": 60,
+          "actualDuration": 60,
+          "successful": true,
+          "events": [
+            {
+              "type": "TAKEOFF",
+              "time": 135
+            },
+            {
+              "type": "LANDING",
+              "time": 195
+            }
+          ]
+        },
+        {
+          "id": "SOR-MIS-3",
+          "missionId": "MIS-3",
+          "missionName": "Instructor Check Ride",
+          "missionType": "TRAINING",
+          "priority": "CRITICAL",
+          "aircraftId": "AC-3",
+          "pilotId": "P-6",
+          "groundCrewIds": [
+            "GC-3"
+          ],
+          "runwayId": "RW-1",
+          "requiredPilotRating": "INSTRUCTOR",
+          "takeoffTime": 175,
+          "landingTime": 295,
+          "plannedDuration": 120,
+          "actualDuration": 120,
+          "successful": true,
+          "events": [
+            {
+              "type": "TAKEOFF",
+              "time": 175
+            },
+            {
+              "type": "LANDING",
+              "time": 295
+            }
+          ]
+        }
+      ],
+      "maintenanceRecords": [
+        {
+          "id": "MNT-AC-1-185",
+          "aircraftId": "AC-1",
+          "maintenanceType": "Routine Inspection",
+          "startTime": 185,
+          "endTime": 305,
+          "isCompleted": true,
+          "remarks": "Maintenance completed.",
+          "duration": 0.002
+        },
+        {
+          "id": "MNT-AC-2-195",
+          "aircraftId": "AC-2",
+          "maintenanceType": "Routine Inspection",
+          "startTime": 195,
+          "endTime": 315,
+          "isCompleted": true,
+          "remarks": "Maintenance completed.",
+          "duration": 0.002
+        },
+        {
+          "id": "MNT-AC-3-295",
+          "aircraftId": "AC-3",
+          "maintenanceType": "Routine Inspection",
+          "startTime": 295,
+          "endTime": 415,
+          "isCompleted": true,
+          "remarks": "Maintenance completed.",
+          "duration": 0.002
+        }
+      ],
+      "schedulerLog": [
+        {
+          "time": 20,
+          "type": "MISSION_ARRIVED",
+          "missionId": "MIS-2",
+          "priority": "HIGH",
+          "requiredPilotRating": "FLIGHT_LEAD"
+        },
+        {
+          "time": 20,
+          "type": "MISSION_DISPATCHED",
+          "missionId": "MIS-2",
+          "priority": "HIGH",
+          "waitingTime": 0,
+          "aircraftId": "AC-1",
+          "pilotId": "P-5",
+          "runwayId": "RW-1"
+        },
+        {
+          "time": 60,
+          "type": "MISSION_ARRIVED",
+          "missionId": "MIS-1",
+          "priority": "LOW",
+          "requiredPilotRating": "TRAINEE"
+        },
+        {
+          "time": 60,
+          "type": "MISSION_DISPATCHED",
+          "missionId": "MIS-1",
+          "priority": "LOW",
+          "waitingTime": 0,
+          "aircraftId": "AC-2",
+          "pilotId": "P-1",
+          "runwayId": "RW-2"
+        },
+        {
+          "time": 95,
+          "type": "SORTIE_TAKEOFF",
+          "missionId": "MIS-2",
+          "sortieId": "SOR-MIS-2",
+          "aircraftId": "AC-1",
+          "pilotId": "P-5"
+        },
+        {
+          "time": 100,
+          "type": "MISSION_ARRIVED",
+          "missionId": "MIS-3",
+          "priority": "CRITICAL",
+          "requiredPilotRating": "INSTRUCTOR"
+        },
+        {
+          "time": 100,
+          "type": "MISSION_DISPATCHED",
+          "missionId": "MIS-3",
+          "priority": "CRITICAL",
+          "waitingTime": 0,
+          "aircraftId": "AC-3",
+          "pilotId": "P-6",
+          "runwayId": "RW-1"
+        },
+        {
+          "time": 135,
+          "type": "SORTIE_TAKEOFF",
+          "missionId": "MIS-1",
+          "sortieId": "SOR-MIS-1",
+          "aircraftId": "AC-2",
+          "pilotId": "P-1"
+        },
+        {
+          "time": 175,
+          "type": "SORTIE_TAKEOFF",
+          "missionId": "MIS-3",
+          "sortieId": "SOR-MIS-3",
+          "aircraftId": "AC-3",
+          "pilotId": "P-6"
+        },
+        {
+          "time": 185,
+          "type": "SORTIE_LANDED",
+          "missionId": "MIS-2",
+          "sortieId": "SOR-MIS-2"
+        },
+        {
+          "time": 195,
+          "type": "SORTIE_LANDED",
+          "missionId": "MIS-1",
+          "sortieId": "SOR-MIS-1"
+        },
+        {
+          "time": 295,
+          "type": "SORTIE_LANDED",
+          "missionId": "MIS-3",
+          "sortieId": "SOR-MIS-3"
+        },
+        {
+          "time": 305,
+          "type": "AIRCRAFT_AVAILABLE_AFTER_MAINTENANCE",
+          "aircraftId": "AC-1"
+        },
+        {
+          "time": 315,
+          "type": "AIRCRAFT_AVAILABLE_AFTER_MAINTENANCE",
+          "aircraftId": "AC-2"
+        },
+        {
+          "time": 415,
+          "type": "AIRCRAFT_AVAILABLE_AFTER_MAINTENANCE",
+          "aircraftId": "AC-3"
+        },
+        {
+          "time": 905,
+          "type": "PILOT_AVAILABLE_AFTER_REST",
+          "pilotId": "P-5"
+        },
+        {
+          "time": 915,
+          "type": "PILOT_AVAILABLE_AFTER_REST",
+          "pilotId": "P-1"
+        },
+        {
+          "time": 1015,
+          "type": "PILOT_AVAILABLE_AFTER_REST",
+          "pilotId": "P-6"
+        }
+      ],
+      "finalSquadronState": {
+        "id": "SQ-CUSTOM",
+        "name": "Custom Fighter Squadron",
+        "aircraft": [
+          {
+            "id": "AC-1",
+            "tailNumber": "F16-1",
+            "aircraftType": "F-16C",
+            "status": "AVAILABLE",
+            "flightHours": 1.5,
+            "assignedMissionId": null,
+            "assignedPilotId": null,
+            "maintenanceRequired": false
+          },
+          {
+            "id": "AC-2",
+            "tailNumber": "F16-2",
+            "aircraftType": "F-16C",
+            "status": "AVAILABLE",
+            "flightHours": 1,
+            "assignedMissionId": null,
+            "assignedPilotId": null,
+            "maintenanceRequired": false
+          },
+          {
+            "id": "AC-3",
+            "tailNumber": "F16-3",
+            "aircraftType": "F-16C",
+            "status": "AVAILABLE",
+            "flightHours": 2,
+            "assignedMissionId": null,
+            "assignedPilotId": null,
+            "maintenanceRequired": false
+          },
+          {
+            "id": "AC-4",
+            "tailNumber": "F16-4",
+            "aircraftType": "F-16C",
+            "status": "AVAILABLE",
+            "flightHours": 0,
+            "assignedMissionId": null,
+            "assignedPilotId": null,
+            "maintenanceRequired": false
+          },
+          {
+            "id": "AC-5",
+            "tailNumber": "F16-5",
+            "aircraftType": "F-16C",
+            "status": "AVAILABLE",
+            "flightHours": 0,
+            "assignedMissionId": null,
+            "assignedPilotId": null,
+            "maintenanceRequired": false
+          },
+          {
+            "id": "AC-6",
+            "tailNumber": "F16-6",
+            "aircraftType": "F-16C",
+            "status": "AVAILABLE",
+            "flightHours": 0,
+            "assignedMissionId": null,
+            "assignedPilotId": null,
+            "maintenanceRequired": false
+          }
+        ],
+        "pilots": [
+          {
+            "id": "P-1",
+            "name": "TRAINEE Pilot 1",
+            "rank": "Officer",
+            "rating": "TRAINEE",
+            "status": "AVAILABLE",
+            "flightHours": 1,
+            "assignedMissionId": null,
+            "assignedAircraftId": null,
+            "restTimeRemaining": 0
+          },
+          {
+            "id": "P-2",
+            "name": "TRAINEE Pilot 2",
+            "rank": "Officer",
+            "rating": "TRAINEE",
+            "status": "AVAILABLE",
+            "flightHours": 0,
+            "assignedMissionId": null,
+            "assignedAircraftId": null,
+            "restTimeRemaining": 0
+          },
+          {
+            "id": "P-3",
+            "name": "WINGMAN Pilot 1",
+            "rank": "Officer",
+            "rating": "WINGMAN",
+            "status": "AVAILABLE",
+            "flightHours": 0,
+            "assignedMissionId": null,
+            "assignedAircraftId": null,
+            "restTimeRemaining": 0
+          },
+          {
+            "id": "P-4",
+            "name": "WINGMAN Pilot 2",
+            "rank": "Officer",
+            "rating": "WINGMAN",
+            "status": "AVAILABLE",
+            "flightHours": 0,
+            "assignedMissionId": null,
+            "assignedAircraftId": null,
+            "restTimeRemaining": 0
+          },
+          {
+            "id": "P-5",
+            "name": "FLIGHT_LEAD Pilot 1",
+            "rank": "Officer",
+            "rating": "FLIGHT_LEAD",
+            "status": "AVAILABLE",
+            "flightHours": 1.5,
+            "assignedMissionId": null,
+            "assignedAircraftId": null,
+            "restTimeRemaining": 0
+          },
+          {
+            "id": "P-6",
+            "name": "INSTRUCTOR Pilot 1",
+            "rank": "Officer",
+            "rating": "INSTRUCTOR",
+            "status": "AVAILABLE",
+            "flightHours": 2,
+            "assignedMissionId": null,
+            "assignedAircraftId": null,
+            "restTimeRemaining": 0
+          }
+        ],
+        "groundCrew": [
+          {
+            "id": "GC-1",
+            "name": "Ground Crew 1",
+            "role": "Technician",
+            "isAvailable": true,
+            "assignedAircraftId": null,
+            "assignedMissionId": null
+          },
+          {
+            "id": "GC-2",
+            "name": "Ground Crew 2",
+            "role": "Technician",
+            "isAvailable": true,
+            "assignedAircraftId": null,
+            "assignedMissionId": null
+          },
+          {
+            "id": "GC-3",
+            "name": "Ground Crew 3",
+            "role": "Technician",
+            "isAvailable": true,
+            "assignedAircraftId": null,
+            "assignedMissionId": null
+          },
+          {
+            "id": "GC-4",
+            "name": "Ground Crew 4",
+            "role": "Technician",
+            "isAvailable": true,
+            "assignedAircraftId": null,
+            "assignedMissionId": null
+          }
+        ],
+        "runways": [
+          {
+            "id": "RW-1",
+            "name": "Runway 1",
+            "isAvailable": true,
+            "currentMissionId": null,
+            "currentAircraftId": null
+          },
+          {
+            "id": "RW-2",
+            "name": "Runway 2",
+            "isAvailable": true,
+            "currentMissionId": null,
+            "currentAircraftId": null
+          }
+        ],
+        "maintenanceRecords": [],
+        "weather": {
+          "id": "W-CUSTOM",
+          "condition": "CLEAR",
+          "visibility": 10,
+          "windSpeed": 5,
+          "isFlyable": true,
+          "baseRisk": 0.02,
+          "visibilityRisk": 0,
+          "windRisk": 0,
+          "manualWeatherAbortRate": 0,
+          "derivedWeatherAbortRate": 0.02,
+          "effectiveWeatherAbortRate": 0.02,
+          "riskLevel": "LOW",
+          "riskReason": "CLEAR conditions with 10 km visibility and 5 wind speed produce a 2% effective weather abort risk."
+        }
+      }
+    },
+    "createdAt": "2026-07-09T17:34:07.405Z",
+    "updatedAt": "2026-07-09T17:34:07.405Z"
+  },
+  {
+    "_id": "1783618745155-7i2s1v11",
+    "simulationNumber": 2,
+    "source": "custom",
+    "scenarioName": "Custom Scenario",
+    "requestPayload": {
+      "aircraftCount": 6,
+      "pilotCount": 6,
+      "groundCrewCount": 4,
+      "runwayCount": 2,
+      "missionCount": 5,
+      "pilotLevels": {
+        "TRAINEE": 2,
+        "WINGMAN": 2,
+        "FLIGHT_LEAD": 1,
+        "FOUR_SHIP_LEAD": 0,
+        "INSTRUCTOR": 1
+      },
+      "missionRequests": [
+        {
+          "name": "Basic Handling Training",
+          "type": "TRAINING",
+          "priority": "LOW",
+          "incomingTime": 60,
+          "requiredPilotRating": "TRAINEE",
+          "duration": 60
+        },
+        {
+          "name": "Air Combat Training",
+          "type": "AIR_TO_AIR",
+          "priority": "HIGH",
+          "incomingTime": 20,
+          "requiredPilotRating": "FLIGHT_LEAD",
+          "duration": 90
+        },
+        {
+          "name": "Instructor Check Ride",
+          "type": "TRAINING",
+          "priority": "CRITICAL",
+          "incomingTime": 100,
+          "requiredPilotRating": "INSTRUCTOR",
+          "duration": 120
+        },
+        {
+          "name": "Mission 4",
+          "type": "AIR_TO_GROUND",
+          "priority": "LOW",
+          "incomingTime": 400,
+          "requiredPilotRating": "WINGMAN",
+          "duration": 60
+        },
+        {
+          "name": "Mission 5",
+          "type": "PATROL",
+          "priority": "MEDIUM",
+          "incomingTime": 1200,
+          "requiredPilotRating": "INSTRUCTOR",
+          "duration": 180
+        }
+      ],
+      "weatherCondition": "HIGH_WIND",
+      "visibility": 5,
+      "windSpeed": 19,
+      "groundAbortRate": 0.05,
+      "airAbortRate": 0.5,
+      "weatherAbortRate": 0,
+      "randomScheduling": false,
+      "missionPlanningEnabled": true,
+      "simulationDuration": 1440
+    },
+    "summary": {
+      "totalMissions": 5,
+      "completedSorties": 1,
+      "abortedMissions": 4,
+      "groundAborts": 0,
+      "airAborts": 0,
+      "weatherAborts": 4,
+      "successRate": 0.2,
+      "aircraftCount": 6,
+      "pilotCount": 6,
+      "groundCrewCount": 4,
+      "runwayCount": 2,
+      "weatherCondition": "HIGH_WIND",
+      "visibility": 5,
+      "windSpeed": 19,
+      "weatherRiskLevel": "HIGH",
+      "weatherAbortRate": 0.39999999999999997,
+      "missionCount": 5,
+      "sortieCount": 1,
+      "maintenanceCount": 1,
+      "schedulerEventCount": 14
+    },
+    "result": {
+      "scenario": {
+        "id": "SC-CUSTOM",
+        "name": "Custom Scenario",
+        "description": "User-defined sortie generation simulation scenario.",
+        "groundAbortRate": 0.05,
+        "airAbortRate": 0.5,
+        "weatherAbortRate": 0.39999999999999997,
+        "manualWeatherAbortRate": 0,
+        "derivedWeatherAbortRate": 0.39999999999999997,
+        "effectiveWeatherAbortRate": 0.39999999999999997,
+        "weatherRiskLevel": "HIGH",
+        "weatherRiskReason": "HIGH_WIND conditions with 5 km visibility and 19 wind speed produce a 40% effective weather abort risk.",
+        "availableAircraft": 6,
+        "availablePilots": 6,
+        "availableGroundCrew": 4,
+        "availableRunways": 2,
+        "randomScheduling": false,
+        "missionPlanningEnabled": true,
+        "simulationDuration": 1440,
+        "missionRequests": [
+          {
+            "name": "Basic Handling Training",
+            "type": "TRAINING",
+            "priority": "LOW",
+            "incomingTime": 60,
+            "requiredPilotRating": "TRAINEE",
+            "duration": 60
+          },
+          {
+            "name": "Air Combat Training",
+            "type": "AIR_TO_AIR",
+            "priority": "HIGH",
+            "incomingTime": 20,
+            "requiredPilotRating": "FLIGHT_LEAD",
+            "duration": 90
+          },
+          {
+            "name": "Instructor Check Ride",
+            "type": "TRAINING",
+            "priority": "CRITICAL",
+            "incomingTime": 100,
+            "requiredPilotRating": "INSTRUCTOR",
+            "duration": 120
+          },
+          {
+            "name": "Mission 4",
+            "type": "AIR_TO_GROUND",
+            "priority": "LOW",
+            "incomingTime": 400,
+            "requiredPilotRating": "WINGMAN",
+            "duration": 60
+          },
+          {
+            "name": "Mission 5",
+            "type": "PATROL",
+            "priority": "MEDIUM",
+            "incomingTime": 1200,
+            "requiredPilotRating": "INSTRUCTOR",
+            "duration": 180
+          }
+        ],
+        "pilotLevels": {
+          "TRAINEE": 2,
+          "WINGMAN": 2,
+          "FLIGHT_LEAD": 1,
+          "FOUR_SHIP_LEAD": 0,
+          "INSTRUCTOR": 1
+        }
+      },
+      "statistics": {
+        "totalMissions": 5,
+        "completedSorties": 1,
+        "abortedMissions": 4,
+        "groundAborts": 0,
+        "airAborts": 0,
+        "weatherAborts": 4,
+        "successRate": 0.2
+      },
+      "missions": [
+        {
+          "id": "MIS-1",
+          "name": "Basic Handling Training",
+          "type": "TRAINING",
+          "priority": "LOW",
+          "status": "ABORTED",
+          "aircraftIds": [
+            "AC-1"
+          ],
+          "pilotIds": [
+            "P-1"
+          ],
+          "groundCrewIds": [
+            "GC-1"
+          ],
+          "runwayId": "RW-1",
+          "incomingTime": 60,
+          "scheduledStartTime": 60,
+          "actualStartTime": null,
+          "endTime": null,
+          "requiredPilotRating": "TRAINEE",
+          "duration": 60,
+          "abortReason": "WEATHER_ABORT",
+          "isCompleted": false
+        },
+        {
+          "id": "MIS-2",
+          "name": "Air Combat Training",
+          "type": "AIR_TO_AIR",
+          "priority": "HIGH",
+          "status": "ABORTED",
+          "aircraftIds": [
+            "AC-1"
+          ],
+          "pilotIds": [
+            "P-5"
+          ],
+          "groundCrewIds": [
+            "GC-1"
+          ],
+          "runwayId": "RW-1",
+          "incomingTime": 20,
+          "scheduledStartTime": 20,
+          "actualStartTime": null,
+          "endTime": null,
+          "requiredPilotRating": "FLIGHT_LEAD",
+          "duration": 90,
+          "abortReason": "WEATHER_ABORT",
+          "isCompleted": false
+        },
+        {
+          "id": "MIS-3",
+          "name": "Instructor Check Ride",
+          "type": "TRAINING",
+          "priority": "CRITICAL",
+          "status": "ABORTED",
+          "aircraftIds": [
+            "AC-1"
+          ],
+          "pilotIds": [
+            "P-6"
+          ],
+          "groundCrewIds": [
+            "GC-1"
+          ],
+          "runwayId": "RW-1",
+          "incomingTime": 100,
+          "scheduledStartTime": 100,
+          "actualStartTime": null,
+          "endTime": null,
+          "requiredPilotRating": "INSTRUCTOR",
+          "duration": 120,
+          "abortReason": "WEATHER_ABORT",
+          "isCompleted": false
+        },
+        {
+          "id": "MIS-4",
+          "name": "Mission 4",
+          "type": "AIR_TO_GROUND",
+          "priority": "LOW",
+          "status": "ABORTED",
+          "aircraftIds": [
+            "AC-1"
+          ],
+          "pilotIds": [
+            "P-3"
+          ],
+          "groundCrewIds": [
+            "GC-1"
+          ],
+          "runwayId": "RW-1",
+          "incomingTime": 400,
+          "scheduledStartTime": 400,
+          "actualStartTime": null,
+          "endTime": null,
+          "requiredPilotRating": "WINGMAN",
+          "duration": 60,
+          "abortReason": "WEATHER_ABORT",
+          "isCompleted": false
+        },
+        {
+          "id": "MIS-5",
+          "name": "Mission 5",
+          "type": "PATROL",
+          "priority": "MEDIUM",
+          "status": "COMPLETED",
+          "aircraftIds": [
+            "AC-1"
+          ],
+          "pilotIds": [
+            "P-6"
+          ],
+          "groundCrewIds": [
+            "GC-1"
+          ],
+          "runwayId": "RW-1",
+          "incomingTime": 1200,
+          "scheduledStartTime": 1200,
+          "actualStartTime": 1275,
+          "endTime": 1455,
+          "requiredPilotRating": "INSTRUCTOR",
+          "duration": 180,
+          "abortReason": null,
+          "isCompleted": true
+        }
+      ],
+      "sorties": [
+        {
+          "id": "SOR-MIS-5",
+          "missionId": "MIS-5",
+          "missionName": "Mission 5",
+          "missionType": "PATROL",
+          "priority": "MEDIUM",
+          "aircraftId": "AC-1",
+          "pilotId": "P-6",
+          "groundCrewIds": [
+            "GC-1"
+          ],
+          "runwayId": "RW-1",
+          "requiredPilotRating": "INSTRUCTOR",
+          "takeoffTime": 1275,
+          "landingTime": 1455,
+          "plannedDuration": 180,
+          "actualDuration": 180,
+          "successful": true,
+          "events": [
+            {
+              "type": "TAKEOFF",
+              "time": 1275
+            },
+            {
+              "type": "LANDING",
+              "time": 1455
+            }
+          ]
+        }
+      ],
+      "maintenanceRecords": [
+        {
+          "id": "MNT-AC-1-1455",
+          "aircraftId": "AC-1",
+          "maintenanceType": "Routine Inspection",
+          "startTime": 1455,
+          "endTime": 1575,
+          "isCompleted": true,
+          "remarks": "Maintenance completed.",
+          "duration": 0.002
+        }
+      ],
+      "schedulerLog": [
+        {
+          "time": 20,
+          "type": "MISSION_ARRIVED",
+          "missionId": "MIS-2",
+          "priority": "HIGH",
+          "requiredPilotRating": "FLIGHT_LEAD"
+        },
+        {
+          "time": 20,
+          "type": "MISSION_ABORTED_AFTER_ALLOCATION",
+          "missionId": "MIS-2",
+          "reason": "WEATHER_ABORT"
+        },
+        {
+          "time": 60,
+          "type": "MISSION_ARRIVED",
+          "missionId": "MIS-1",
+          "priority": "LOW",
+          "requiredPilotRating": "TRAINEE"
+        },
+        {
+          "time": 60,
+          "type": "MISSION_ABORTED_AFTER_ALLOCATION",
+          "missionId": "MIS-1",
+          "reason": "WEATHER_ABORT"
+        },
+        {
+          "time": 100,
+          "type": "MISSION_ARRIVED",
+          "missionId": "MIS-3",
+          "priority": "CRITICAL",
+          "requiredPilotRating": "INSTRUCTOR"
+        },
+        {
+          "time": 100,
+          "type": "MISSION_ABORTED_AFTER_ALLOCATION",
+          "missionId": "MIS-3",
+          "reason": "WEATHER_ABORT"
+        },
+        {
+          "time": 400,
+          "type": "MISSION_ARRIVED",
+          "missionId": "MIS-4",
+          "priority": "LOW",
+          "requiredPilotRating": "WINGMAN"
+        },
+        {
+          "time": 400,
+          "type": "MISSION_ABORTED_AFTER_ALLOCATION",
+          "missionId": "MIS-4",
+          "reason": "WEATHER_ABORT"
+        },
+        {
+          "time": 1200,
+          "type": "MISSION_ARRIVED",
+          "missionId": "MIS-5",
+          "priority": "MEDIUM",
+          "requiredPilotRating": "INSTRUCTOR"
+        },
+        {
+          "time": 1200,
+          "type": "MISSION_DISPATCHED",
+          "missionId": "MIS-5",
+          "priority": "MEDIUM",
+          "waitingTime": 0,
+          "aircraftId": "AC-1",
+          "pilotId": "P-6",
+          "runwayId": "RW-1"
+        },
+        {
+          "time": 1275,
+          "type": "SORTIE_TAKEOFF",
+          "missionId": "MIS-5",
+          "sortieId": "SOR-MIS-5",
+          "aircraftId": "AC-1",
+          "pilotId": "P-6"
+        },
+        {
+          "time": 1455,
+          "type": "SORTIE_LANDED",
+          "missionId": "MIS-5",
+          "sortieId": "SOR-MIS-5"
+        },
+        {
+          "time": 1575,
+          "type": "AIRCRAFT_AVAILABLE_AFTER_MAINTENANCE",
+          "aircraftId": "AC-1"
+        },
+        {
+          "time": 2175,
+          "type": "PILOT_AVAILABLE_AFTER_REST",
+          "pilotId": "P-6"
+        }
+      ],
+      "finalSquadronState": {
+        "id": "SQ-CUSTOM",
+        "name": "Custom Fighter Squadron",
+        "aircraft": [
+          {
+            "id": "AC-1",
+            "tailNumber": "F16-1",
+            "aircraftType": "F-16C",
+            "status": "AVAILABLE",
+            "flightHours": 3,
+            "assignedMissionId": null,
+            "assignedPilotId": null,
+            "maintenanceRequired": false
+          },
+          {
+            "id": "AC-2",
+            "tailNumber": "F16-2",
+            "aircraftType": "F-16C",
+            "status": "AVAILABLE",
+            "flightHours": 0,
+            "assignedMissionId": null,
+            "assignedPilotId": null,
+            "maintenanceRequired": false
+          },
+          {
+            "id": "AC-3",
+            "tailNumber": "F16-3",
+            "aircraftType": "F-16C",
+            "status": "AVAILABLE",
+            "flightHours": 0,
+            "assignedMissionId": null,
+            "assignedPilotId": null,
+            "maintenanceRequired": false
+          },
+          {
+            "id": "AC-4",
+            "tailNumber": "F16-4",
+            "aircraftType": "F-16C",
+            "status": "AVAILABLE",
+            "flightHours": 0,
+            "assignedMissionId": null,
+            "assignedPilotId": null,
+            "maintenanceRequired": false
+          },
+          {
+            "id": "AC-5",
+            "tailNumber": "F16-5",
+            "aircraftType": "F-16C",
+            "status": "AVAILABLE",
+            "flightHours": 0,
+            "assignedMissionId": null,
+            "assignedPilotId": null,
+            "maintenanceRequired": false
+          },
+          {
+            "id": "AC-6",
+            "tailNumber": "F16-6",
+            "aircraftType": "F-16C",
+            "status": "AVAILABLE",
+            "flightHours": 0,
+            "assignedMissionId": null,
+            "assignedPilotId": null,
+            "maintenanceRequired": false
+          }
+        ],
+        "pilots": [
+          {
+            "id": "P-1",
+            "name": "TRAINEE Pilot 1",
+            "rank": "Officer",
+            "rating": "TRAINEE",
+            "status": "AVAILABLE",
+            "flightHours": 0,
+            "assignedMissionId": null,
+            "assignedAircraftId": null,
+            "restTimeRemaining": 0
+          },
+          {
+            "id": "P-2",
+            "name": "TRAINEE Pilot 2",
+            "rank": "Officer",
+            "rating": "TRAINEE",
+            "status": "AVAILABLE",
+            "flightHours": 0,
+            "assignedMissionId": null,
+            "assignedAircraftId": null,
+            "restTimeRemaining": 0
+          },
+          {
+            "id": "P-3",
+            "name": "WINGMAN Pilot 1",
+            "rank": "Officer",
+            "rating": "WINGMAN",
+            "status": "AVAILABLE",
+            "flightHours": 0,
+            "assignedMissionId": null,
+            "assignedAircraftId": null,
+            "restTimeRemaining": 0
+          },
+          {
+            "id": "P-4",
+            "name": "WINGMAN Pilot 2",
+            "rank": "Officer",
+            "rating": "WINGMAN",
+            "status": "AVAILABLE",
+            "flightHours": 0,
+            "assignedMissionId": null,
+            "assignedAircraftId": null,
+            "restTimeRemaining": 0
+          },
+          {
+            "id": "P-5",
+            "name": "FLIGHT_LEAD Pilot 1",
+            "rank": "Officer",
+            "rating": "FLIGHT_LEAD",
+            "status": "AVAILABLE",
+            "flightHours": 0,
+            "assignedMissionId": null,
+            "assignedAircraftId": null,
+            "restTimeRemaining": 0
+          },
+          {
+            "id": "P-6",
+            "name": "INSTRUCTOR Pilot 1",
+            "rank": "Officer",
+            "rating": "INSTRUCTOR",
+            "status": "AVAILABLE",
+            "flightHours": 3,
+            "assignedMissionId": null,
+            "assignedAircraftId": null,
+            "restTimeRemaining": 0
+          }
+        ],
+        "groundCrew": [
+          {
+            "id": "GC-1",
+            "name": "Ground Crew 1",
+            "role": "Technician",
+            "isAvailable": true,
+            "assignedAircraftId": null,
+            "assignedMissionId": null
+          },
+          {
+            "id": "GC-2",
+            "name": "Ground Crew 2",
+            "role": "Technician",
+            "isAvailable": true,
+            "assignedAircraftId": null,
+            "assignedMissionId": null
+          },
+          {
+            "id": "GC-3",
+            "name": "Ground Crew 3",
+            "role": "Technician",
+            "isAvailable": true,
+            "assignedAircraftId": null,
+            "assignedMissionId": null
+          },
+          {
+            "id": "GC-4",
+            "name": "Ground Crew 4",
+            "role": "Technician",
+            "isAvailable": true,
+            "assignedAircraftId": null,
+            "assignedMissionId": null
+          }
+        ],
+        "runways": [
+          {
+            "id": "RW-1",
+            "name": "Runway 1",
+            "isAvailable": true,
+            "currentMissionId": null,
+            "currentAircraftId": null
+          },
+          {
+            "id": "RW-2",
+            "name": "Runway 2",
+            "isAvailable": true,
+            "currentMissionId": null,
+            "currentAircraftId": null
+          }
+        ],
+        "maintenanceRecords": [],
+        "weather": {
+          "id": "W-CUSTOM",
+          "condition": "HIGH_WIND",
+          "visibility": 5,
+          "windSpeed": 19,
+          "isFlyable": true,
+          "baseRisk": 0.3,
+          "visibilityRisk": 0.05,
+          "windRisk": 0.05,
+          "manualWeatherAbortRate": 0,
+          "derivedWeatherAbortRate": 0.39999999999999997,
+          "effectiveWeatherAbortRate": 0.39999999999999997,
+          "riskLevel": "HIGH",
+          "riskReason": "HIGH_WIND conditions with 5 km visibility and 19 wind speed produce a 40% effective weather abort risk."
+        }
+      }
+    },
+    "createdAt": "2026-07-09T17:39:05.155Z",
+    "updatedAt": "2026-07-09T17:39:05.155Z"
+  }
+]

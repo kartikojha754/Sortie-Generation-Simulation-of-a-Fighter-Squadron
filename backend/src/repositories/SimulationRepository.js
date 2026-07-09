@@ -1,5 +1,4 @@
-const SimulationHistory = require("../models/SimulationHistory");
-const { isDBConnected } = require("../database/mongodb");
+const JsonFileHandler = require("../handlers/JsonFileHandler");
 
 class SimulationRepository {
   static async saveSimulation({
@@ -7,13 +6,9 @@ class SimulationRepository {
     requestPayload = {},
     result,
   }) {
-    if (!isDBConnected()) {
-      throw new Error("Database is not connected.");
-    }
+    const simulationNumber = (await JsonFileHandler.countSimulations()) + 1;
 
-    const simulationNumber = (await SimulationHistory.countDocuments()) + 1;
-
-    const document = await SimulationHistory.create({
+    return JsonFileHandler.createSimulation({
       simulationNumber,
       source,
       scenarioName: result.scenario?.name || "Unnamed Scenario",
@@ -21,37 +16,18 @@ class SimulationRepository {
       summary: this.buildSummary(result),
       result,
     });
-
-    return document;
   }
 
   static async getAllSimulations() {
-    if (!isDBConnected()) {
-      throw new Error("Database is not connected.");
-    }
-
-    return SimulationHistory.find({})
-      .select(
-        "simulationNumber source scenarioName summary createdAt updatedAt",
-      )
-      .sort({ createdAt: -1 })
-      .lean();
+    return JsonFileHandler.getAllSimulations();
   }
 
   static async getSimulationById(id) {
-    if (!isDBConnected()) {
-      throw new Error("Database is not connected.");
-    }
-
-    return SimulationHistory.findById(id).lean();
+    return JsonFileHandler.getSimulationById(id);
   }
 
   static async deleteSimulationById(id) {
-    if (!isDBConnected()) {
-      throw new Error("Database is not connected.");
-    }
-
-    return SimulationHistory.findByIdAndDelete(id).lean();
+    return JsonFileHandler.deleteSimulationById(id);
   }
 
   static buildSummary(result) {
