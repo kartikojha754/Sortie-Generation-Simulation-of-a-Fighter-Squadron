@@ -90,7 +90,9 @@ export default function ScenarioPreview() {
             </p>
             <p>
               Mission Type Mode:{" "}
-              {scenario.randomScheduling ? "Random" : "Fixed Training"}
+              {scenario.randomScheduling
+                ? "Fully Randomized"
+                : "Fixed / Custom"}
             </p>
             <p>
               Planning Phase:{" "}

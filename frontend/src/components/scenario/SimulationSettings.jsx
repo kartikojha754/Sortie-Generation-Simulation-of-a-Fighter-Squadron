@@ -42,10 +42,10 @@ export default function SimulationSettings() {
 
         <Toggle
           label="Mission Assignment Strategy"
-          description="Fixed creates training missions. Random generates varied mission types."
+          description="Fixed uses your custom queue or default training missions. Random generates mission type, priority, arrival time, pilot rating, and duration."
           checked={scenario.randomScheduling}
-          activeLabel="RANDOM TYPES"
-          inactiveLabel="FIXED TRAINING"
+          activeLabel="FULL RANDOM"
+          inactiveLabel="FIXED / CUSTOM"
           onChange={(value) => updateScenarioField("randomScheduling", value)}
         />
 

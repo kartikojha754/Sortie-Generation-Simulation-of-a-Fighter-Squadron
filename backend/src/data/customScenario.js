@@ -24,8 +24,9 @@ function createCustomScenario(input = {}) {
     ? input.missionRequests
     : [];
 
-  const missionCount =
-    missionRequests.length > 0
+  const missionCount = input.randomScheduling
+    ? input.missionCount || missionRequests.length || 5
+    : missionRequests.length > 0
       ? missionRequests.length
       : input.missionCount || 5;
 

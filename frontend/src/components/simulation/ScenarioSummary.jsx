@@ -155,7 +155,9 @@ export default function ScenarioSummary({ scenario = {}, weather = null }) {
 
           <Row
             label="Mission Type Mode"
-            value={scenario.randomScheduling ? "Random" : "Fixed Training"}
+            value={
+              scenario.randomScheduling ? "Fully Randomized" : "Fixed / Custom"
+            }
           />
 
           <Row
