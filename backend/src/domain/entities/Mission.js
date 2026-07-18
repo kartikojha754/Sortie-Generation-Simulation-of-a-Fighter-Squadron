@@ -34,6 +34,9 @@ class Mission {
     this.requiredAircraftCount = Number(data.requiredAircraftCount || 1);
     this.strikePlan = data.strikePlan || null;
     this.strikePlanningSummary = data.strikePlanningSummary || null;
+    this.weaponInventory = data.weaponInventory || {};
+    this.weaponUsage = data.weaponUsage || {};
+    this.remainingWeaponInventory = data.remainingWeaponInventory || {};
 
     this.abortReason = data.abortReason || null;
     this.isCompleted = data.isCompleted || false;
@@ -61,14 +64,42 @@ class Mission {
     this.targetType = planningResult.target.type;
     this.requiredAircraftCount = bestPlan.aircraftCount;
     this.duration = Math.ceil(bestPlan.sortieDuration);
-    this.strikePlan = { ...bestPlan };
+    this.strikePlan = {
+      ...bestPlan,
+      deliveredDamagePercentage:
+        bestPlan.deliveredDamagePercentage ??
+        bestPlan.achievedDamagePercentage ??
+        this.requiredDamagePercentage,
+      maximumPossibleDamagePercentage:
+        bestPlan.maximumPossibleDamagePercentage ??
+        bestPlan.possibleDamagePercentage ??
+        bestPlan.achievedDamagePercentage ??
+        this.requiredDamagePercentage,
+      requestedDamagePercentage:
+        bestPlan.requestedDamagePercentage ?? this.requiredDamagePercentage,
+    };
     this.strikePlanningSummary = {
       requestedDamagePercentage: this.requiredDamagePercentage,
       generatedPlanCount: planningResult.generatedPlanCount,
       validPlanCount: planningResult.validPlanCount,
       fastestPlan: planningResult.fastestPlan,
       lowestResourcePlan: planningResult.lowestResourcePlan,
-      results: planningResult.results,
+      weaponInventory: planningResult.weaponInventory || this.weaponInventory,
+      results: (planningResult.results || []).map((plan) => ({
+        ...plan,
+        deliveredDamagePercentage:
+          plan.deliveredDamagePercentage ??
+          plan.achievedDamagePercentage ??
+          plan.damagePercentage ??
+          0,
+        maximumPossibleDamagePercentage:
+          plan.maximumPossibleDamagePercentage ??
+          plan.possibleDamagePercentage ??
+          plan.achievedDamagePercentage ??
+          0,
+        requestedDamagePercentage:
+          plan.requestedDamagePercentage ?? this.requiredDamagePercentage,
+      })),
     };
     return true;
   }
@@ -115,6 +146,9 @@ class Mission {
       requiredAircraftCount: this.requiredAircraftCount,
       strikePlan: this.strikePlan,
       strikePlanningSummary: this.strikePlanningSummary,
+      weaponInventory: this.weaponInventory,
+      weaponUsage: this.weaponUsage,
+      remainingWeaponInventory: this.remainingWeaponInventory,
       abortReason: this.abortReason,
       isCompleted: this.isCompleted,
     };

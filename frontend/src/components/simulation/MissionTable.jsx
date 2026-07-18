@@ -18,13 +18,26 @@ function statusBadge(status) {
   return "bg-slate-500/10 text-slate-300 border-slate-500/40";
 }
 
+function getNumericValue(source, keys, fallback = 0) {
+  for (const key of keys) {
+    const value = Number(source?.[key]);
+    if (Number.isFinite(value)) return value;
+  }
+  return fallback;
+}
+
 function FinalStrikeResult({ mission }) {
   const plan = mission.strikePlan;
+  const deliveredDamage = getNumericValue(plan, [
+    "deliveredDamagePercentage",
+    "achievedDamagePercentage",
+    "damagePercentage",
+  ]);
   return (
     <div className="rounded-xl border border-green-800/40 bg-green-950/10 p-4">
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.22em] text-green-400">Selected Strike Result</p>
+          <p className="text-xs uppercase tracking-[0.22em] text-green-400">Strike Result</p>
           <h4 className="mt-1 font-semibold text-slate-100">{mission.name}</h4>
           <p className="mt-1 text-xs text-slate-500">Target: {formatName(mission.targetType || "Unknown")}</p>
         </div>
@@ -41,9 +54,9 @@ function FinalStrikeResult({ mission }) {
         <>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             {[
-              ["Classification", formatName(plan.classification)],
-              ["Requested Damage", `${mission.requiredDamagePercentage}%`],
-              ["Achievable Damage", `${plan.achievedDamagePercentage}%`],
+              ["Result", plan.valid ? "Success" : "Failure"],
+              ["Required Damage", `${mission.requiredDamagePercentage}%`],
+              ["Delivered Damage", `${deliveredDamage}%`],
               ["Aircraft", plan.aircraftCount],
               ["Total Time", `${plan.sortieDuration} min`],
             ].map(([label, value]) => (
@@ -54,7 +67,7 @@ function FinalStrikeResult({ mission }) {
             ))}
           </div>
           <div className="mt-4 rounded-lg border border-green-900/30 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wider text-green-400">Selected Combination</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-green-400">Weapon Combination</p>
             <p className="mt-2 text-sm text-slate-200">{plan.combinationName}</p>
           </div>
         </>

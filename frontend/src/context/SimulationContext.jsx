@@ -1,14 +1,22 @@
 // src/context/SimulationContext.jsx
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { runSimulation } from "../services/simulationService";
 
 const SimulationContext = createContext(null);
+const OLD_STORAGE_KEY = "sortieSimulationResult";
 
 export function SimulationProvider({ children }) {
+  // Simulation results now live only in React memory.
+  // Refreshing or reopening the frontend starts with no previous result.
   const [simulationResult, setSimulationResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    // Remove results saved by older project versions so they cannot reappear.
+    localStorage.removeItem(OLD_STORAGE_KEY);
+  }, []);
 
   async function executeSimulation(scenario) {
     try {
@@ -16,16 +24,11 @@ export function SimulationProvider({ children }) {
       setError("");
 
       const result = await runSimulation(scenario);
-
-      console.log("=== BACKEND RESPONSE ===");
-      console.log(result);
-
       setSimulationResult(result);
 
       return result;
     } catch (err) {
-      console.error("=== SIMULATION ERROR ===");
-      console.error(err);
+      console.error("=== SIMULATION ERROR ===", err);
 
       const message =
         err?.response?.data?.message ||

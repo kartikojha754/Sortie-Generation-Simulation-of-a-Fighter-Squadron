@@ -10,17 +10,22 @@ class StrikePlanOptimizer {
       };
     }
 
-    const bestPlan = [...validPlans].sort((a, b) => this.compareBestPlans(a, b))[0];
+    const bestPlan = [...validPlans].sort((a, b) =>
+      this.compareBestPlans(a, b),
+    )[0];
+
     const fastestPlan = [...validPlans].sort(
       (a, b) =>
         a.sortieDuration - b.sortieDuration ||
         a.aircraftCount - b.aircraftCount ||
         a.totalWeaponCount - b.totalWeaponCount,
     )[0];
+
     const lowestResourcePlan = [...validPlans].sort(
       (a, b) =>
         a.aircraftCount - b.aircraftCount ||
         a.totalWeaponCount - b.totalWeaponCount ||
+        a.totalAttackPower - b.totalAttackPower ||
         a.sortieDuration - b.sortieDuration,
     )[0];
 
@@ -28,11 +33,16 @@ class StrikePlanOptimizer {
   }
 
   compareBestPlans(a, b) {
+    // First choose the plan whose delivered damage is closest to the requested
+    // objective. This prevents an unnecessarily destructive weapon from being
+    // selected merely because it finishes faster. When over-damage is equal,
+    // prefer fewer aircraft, fewer weapons, and then the shorter mission.
     return (
+      a.excessDamagePercentage - b.excessDamagePercentage ||
       a.aircraftCount - b.aircraftCount ||
       a.totalWeaponCount - b.totalWeaponCount ||
       a.sortieDuration - b.sortieDuration ||
-      b.achievedDamagePercentage - a.achievedDamagePercentage
+      a.totalAttackPower - b.totalAttackPower
     );
   }
 }

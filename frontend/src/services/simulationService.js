@@ -15,6 +15,9 @@ export function prepareSimulationPayload(scenario) {
 
     pilotLevels: scenario.pilotLevels,
     missionRequests: scenario.missionRequests || [],
+    weaponInventory: scenario.weaponInventory || {},
+    maxStrikeAircraft: scenario.maxStrikeAircraft || 4,
+    aircraftSpeedKmph: scenario.aircraftSpeedKmph || 900,
 
     weatherCondition: scenario.weatherCondition,
     visibility: scenario.visibility,

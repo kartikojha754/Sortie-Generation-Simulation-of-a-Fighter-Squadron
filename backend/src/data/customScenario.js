@@ -146,6 +146,7 @@ function createCustomScenario(input = {}) {
 
     missionRequests,
     pilotLevels,
+    weaponInventory: input.weaponInventory || {},
   });
 
   return {

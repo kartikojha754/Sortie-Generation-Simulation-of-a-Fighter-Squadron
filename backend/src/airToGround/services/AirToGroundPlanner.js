@@ -12,14 +12,30 @@ class AirToGroundPlanner {
     requiredDamagePercentage = 100,
     aircraftSpeedKmph = 900,
     maxAircraft = 4,
+    weaponInventory = {},
   }) {
     const target = this.findTarget(targetId);
+    const normalizedInventory =
+      this.combinationGenerator.normalizeInventory(weaponInventory);
 
     if (!target) {
-      return this.failure("TARGET_NOT_FOUND", null, []);
+      return this.failure("TARGET_NOT_FOUND", null, [], normalizedInventory);
     }
 
-    const combinations = this.combinationGenerator.generate({ maxAircraft });
+    const combinations = this.combinationGenerator.generate({
+      maxAircraft,
+      weaponInventory: normalizedInventory,
+    });
+
+    if (combinations.length === 0) {
+      return this.failure(
+        "WEAPON_INVENTORY_UNAVAILABLE",
+        target,
+        [],
+        normalizedInventory,
+      );
+    }
+
     const results = combinations.map((combination) =>
       this.planEvaluator.evaluate({
         combination,
@@ -42,6 +58,7 @@ class AirToGroundPlanner {
             : "DAMAGE_REQUIREMENT_NOT_MET",
           target,
           results,
+          normalizedInventory,
         ),
         ...optimized,
       };
@@ -51,6 +68,7 @@ class AirToGroundPlanner {
       success: true,
       failureReason: null,
       target,
+      weaponInventory: normalizedInventory,
       requestedDamagePercentage: Number(requiredDamagePercentage),
       generatedPlanCount: results.length,
       validPlanCount: results.filter((result) => result.valid).length,
@@ -59,11 +77,12 @@ class AirToGroundPlanner {
     };
   }
 
-  failure(failureReason, target, results) {
+  failure(failureReason, target, results, weaponInventory = {}) {
     return {
       success: false,
       failureReason,
       target,
+      weaponInventory,
       generatedPlanCount: results.length,
       validPlanCount: 0,
       results,

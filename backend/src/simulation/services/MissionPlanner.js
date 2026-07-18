@@ -3,6 +3,7 @@ const { entities, enums } = require("../../domain");
 const {
   createAirToGroundPlanner,
   targets,
+  weapons,
 } = require("../../airToGround");
 
 const { Mission } = entities;
@@ -16,6 +17,12 @@ class MissionPlanner {
 
   createMissions(count = 5, scenario = {}) {
     const missionCount = Number(count || 5);
+
+    // One shared stock for the actual selected plans in this simulation.
+    // Alternative combinations are only evaluated; only the chosen plan consumes stock.
+    this.remainingWeaponInventory = this.normalizeWeaponInventory(
+      scenario.weaponInventory,
+    );
 
     if (scenario.randomScheduling) {
       return this.createRandomMissions(missionCount, scenario);
@@ -84,6 +91,8 @@ class MissionPlanner {
       requiredDamagePercentage: Number(
         request.requiredDamagePercentage || 100,
       ),
+
+      weaponInventory: { ...this.remainingWeaponInventory },
     });
 
     this.applyAirToGroundPlanning(mission, scenario);
@@ -109,6 +118,8 @@ class MissionPlanner {
       maxAircraft: Number(scenario.maxStrikeAircraft || 4),
 
       requiredDamagePercentage: mission.requiredDamagePercentage,
+
+      weaponInventory: this.remainingWeaponInventory,
     });
 
     if (!planningResult.success) {
@@ -129,7 +140,45 @@ class MissionPlanner {
       return;
     }
 
+    mission.weaponInventory = { ...this.remainingWeaponInventory };
     mission.applyStrikePlan(planningResult);
+    this.consumeSelectedWeapons(planningResult.bestPlan);
+    mission.weaponUsage = { ...(planningResult.bestPlan.weaponUsage || {}) };
+    mission.remainingWeaponInventory = { ...this.remainingWeaponInventory };
+  }
+
+  normalizeWeaponInventory(inventory = {}) {
+    const normalized = {};
+
+    for (const weapon of weapons) {
+      const value = inventory?.[weapon.type] ?? inventory?.[weapon.id];
+      const fallback = Number(weapon.defaultAvailableQuantity || 0);
+      const parsed =
+        value === undefined || value === null || value === ""
+          ? fallback
+          : Number(value);
+
+      normalized[weapon.type] = Math.max(
+        0,
+        Number.isFinite(parsed) ? Math.floor(parsed) : 0,
+      );
+    }
+
+    return normalized;
+  }
+
+  consumeSelectedWeapons(bestPlan) {
+    if (!bestPlan?.weaponUsage) return;
+
+    for (const [weaponType, usedQuantity] of Object.entries(
+      bestPlan.weaponUsage,
+    )) {
+      const current = Number(this.remainingWeaponInventory[weaponType] || 0);
+      this.remainingWeaponInventory[weaponType] = Math.max(
+        0,
+        current - Number(usedQuantity || 0),
+      );
+    }
   }
 
   createRandomMissions(count = 5, scenario = {}) {
@@ -184,6 +233,8 @@ class MissionPlanner {
         requiredDamagePercentage: Number(
           scenario.requiredDamagePercentage || 100,
         ),
+
+        weaponInventory: { ...this.remainingWeaponInventory },
       });
 
       this.applyAirToGroundPlanning(mission, scenario);

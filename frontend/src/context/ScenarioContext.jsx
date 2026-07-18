@@ -8,6 +8,14 @@ const defaultScenario = {
   runwayCount: 2,
   missionCount: 5,
 
+  weaponInventory: {
+    AIRCRAFT_GUN: 8,
+    LIGHT_BOMB: 20,
+    HEAVY_BOMB: 10,
+    AIR_TO_GROUND_MISSILE: 12,
+    HEAVY_AIR_TO_GROUND_MISSILE: 6,
+  },
+
   pilotLevels: {
     TRAINEE: 2,
     WINGMAN: 2,
@@ -63,6 +71,19 @@ export function ScenarioProvider({ children }) {
     setScenario((prev) => ({
       ...prev,
       [field]: value,
+    }));
+  }
+
+  function updateWeaponInventory(weaponType, value) {
+    const numberValue = Number(value);
+    if (Number.isNaN(numberValue)) return;
+
+    setScenario((prev) => ({
+      ...prev,
+      weaponInventory: {
+        ...prev.weaponInventory,
+        [weaponType]: Math.max(0, Math.floor(numberValue)),
+      },
     }));
   }
 
@@ -140,6 +161,7 @@ export function ScenarioProvider({ children }) {
         scenario,
         updateScenarioField,
         updatePilotLevel,
+        updateWeaponInventory,
         addMissionRequest,
         updateMissionRequest,
         removeMissionRequest,

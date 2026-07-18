@@ -46,6 +46,7 @@ class StrikePlanEvaluator {
         weaponId: weapon.id,
         weaponType: weapon.type,
         quantityPerAircraft,
+        totalQuantity: quantityPerAircraft * combination.aircraftCount,
         averageAttackPower,
         attackPowerPerAircraft: this.round(loadoutAttackPower),
       };
@@ -62,25 +63,54 @@ class StrikePlanEvaluator {
       maxTime - roundTripTravelTimeMinutes,
     );
 
-    const achievableDamagePoints = Math.min(
+    const maximumPossibleDamagePoints = Math.min(
       target.hp,
       totalAttackPower * availableAttackTimeMinutes,
     );
-    const achievedDamagePercentage = Math.min(
+    const maximumPossibleDamagePercentage = Math.min(
       100,
-      (achievableDamagePoints / target.hp) * 100,
+      (maximumPossibleDamagePoints / target.hp) * 100,
     );
 
-    const attackTimeMinutes = requiredDamagePoints / totalAttackPower;
+    // Attacks are evaluated in complete one-minute firing windows. A weapon
+    // cannot be credited for an arbitrary fraction of a minute, so a plan may
+    // deliver slightly more than the requested damage. This lets the optimizer
+    // prefer the package that reaches the objective with the least over-damage.
+    const exactAttackTimeMinutes = requiredDamagePoints / totalAttackPower;
+    const attackTimeMinutes = Math.ceil(exactAttackTimeMinutes);
     const sortieDuration = roundTripTravelTimeMinutes + attackTimeMinutes;
     const withinTime = sortieDuration <= maxTime;
+
+    const plannedDamagePoints = Math.min(
+      target.hp,
+      totalAttackPower * attackTimeMinutes,
+    );
+    const plannedDamagePercentage = Math.min(
+      100,
+      (plannedDamagePoints / target.hp) * 100,
+    );
+
     const damageRequirementMet =
-      achievedDamagePercentage + 0.0001 >= requestedDamagePercent;
+      plannedDamagePercentage + 0.0001 >= requestedDamagePercent;
     const valid = withinTime && damageRequirementMet;
 
-    let classification = "FAILED";
-    if (achievedDamagePercentage >= 100) classification = "TARGET_DESTROYED";
-    else if (damageRequirementMet) classification = "PARTIAL_SUCCESS";
+    const deliveredDamagePoints = valid
+      ? plannedDamagePoints
+      : maximumPossibleDamagePoints;
+    const deliveredDamagePercentage = Math.min(
+      100,
+      (deliveredDamagePoints / target.hp) * 100,
+    );
+    const excessDamagePercentage = valid
+      ? Math.max(0, deliveredDamagePercentage - requestedDamagePercent)
+      : 0;
+
+    const classification = valid ? "SUCCESS" : "FAILURE";
+
+    const weaponUsage = {};
+    for (const item of evaluatedLoadout) {
+      weaponUsage[item.weaponType] = item.totalQuantity;
+    }
 
     return {
       id: combination.id,
@@ -107,14 +137,19 @@ class StrikePlanEvaluator {
             `${item.quantityPerAircraft} × ${item.weaponType.replaceAll("_", " ")}`,
         )
         .join(" + "),
+      weaponUsage,
       attackPowerPerAircraft: this.round(attackPowerPerAircraft),
       totalAttackPower: this.round(totalAttackPower),
       weaponsPerAircraft,
       totalWeaponCount,
       requestedDamagePercentage: requestedDamagePercent,
       requiredDamagePoints: this.round(requiredDamagePoints),
-      achievableDamagePoints: this.round(achievableDamagePoints),
-      achievedDamagePercentage: this.round(achievedDamagePercentage),
+      deliveredDamagePoints: this.round(deliveredDamagePoints),
+      deliveredDamagePercentage: this.round(deliveredDamagePercentage),
+      excessDamagePercentage: this.round(excessDamagePercentage),
+      exactAttackTimeMinutes: this.round(exactAttackTimeMinutes),
+      maximumPossibleDamagePoints: this.round(maximumPossibleDamagePoints),
+      maximumPossibleDamagePercentage: this.round(maximumPossibleDamagePercentage),
       availableAttackTimeMinutes: this.round(availableAttackTimeMinutes),
       attackTimeMinutes: this.round(attackTimeMinutes),
       oneWayTravelTimeMinutes: this.round(oneWayTravelTimeMinutes),

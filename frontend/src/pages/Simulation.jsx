@@ -44,7 +44,7 @@ export default function Simulation() {
           scenario={resultData.scenario}
           weather={resultData.finalSquadronState?.weather}
         />
-        <MissionTable missions={resultData.missions} />
+        <MissionTable missions={resultData.missions} scenarioWeaponInventory={resultData.scenario?.weaponInventory || {}} />
         <SortieTable sorties={resultData.sorties} />
         <SquadronStateSummary squadron={resultData.finalSquadronState} />
 

@@ -32,6 +32,7 @@ class Scenario {
 
     this.missionRequests = data.missionRequests || [];
     this.pilotLevels = data.pilotLevels || {};
+    this.weaponInventory = data.weaponInventory || {};
   }
 
   enableRandomScheduling() {
@@ -77,6 +78,7 @@ class Scenario {
 
       missionRequests: this.missionRequests,
       pilotLevels: this.pilotLevels,
+      weaponInventory: this.weaponInventory,
     };
   }
 }
