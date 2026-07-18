@@ -19,7 +19,11 @@ class StrikePlanOptimizer {
         return a.sortieDuration - b.sortieDuration;
       }
 
-      return a.aircraftCount - b.aircraftCount;
+      if (a.aircraftCount !== b.aircraftCount) {
+        return a.aircraftCount - b.aircraftCount;
+      }
+
+      return a.totalWeaponCount - b.totalWeaponCount;
     })[0];
 
     const lowestResourcePlan = [...validPlans].sort((a, b) => {
@@ -46,12 +50,12 @@ class StrikePlanOptimizer {
       return a.aircraftCount - b.aircraftCount;
     }
 
-    if (a.sortieDuration !== b.sortieDuration) {
-      return a.sortieDuration - b.sortieDuration;
-    }
-
     if (a.totalWeaponCount !== b.totalWeaponCount) {
       return a.totalWeaponCount - b.totalWeaponCount;
+    }
+
+    if (a.sortieDuration !== b.sortieDuration) {
+      return a.sortieDuration - b.sortieDuration;
     }
 
     return b.totalAttackPower - a.totalAttackPower;

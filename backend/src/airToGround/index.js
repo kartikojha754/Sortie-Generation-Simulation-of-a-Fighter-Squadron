@@ -18,6 +18,7 @@ function createAirToGroundPlanner() {
 
   return new AirToGroundPlanner({
     targets,
+    weapons,
     combinationGenerator,
     planEvaluator,
     planOptimizer,

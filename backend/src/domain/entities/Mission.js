@@ -5,27 +5,18 @@ const {
   PilotRating,
 } = require("../enums");
 
-/**
- * Represents a mission assigned to one or more
- * aircraft and pilots.
- */
 class Mission {
   constructor(data = {}) {
     this.id = data.id || null;
     this.name = data.name || "";
 
     this.type = data.type || MissionType.TRAINING;
-
     this.priority = data.priority || MissionPriority.MEDIUM;
-
     this.status = data.status || MissionStatus.SCHEDULED;
 
     this.aircraftIds = data.aircraftIds || [];
-
     this.pilotIds = data.pilotIds || [];
-
     this.groundCrewIds = data.groundCrewIds || [];
-
     this.runwayId = data.runwayId || null;
 
     this.incomingTime = data.incomingTime ?? data.scheduledStartTime ?? 0;
@@ -41,10 +32,9 @@ class Mission {
     this.duration = Number(data.duration || 90);
 
     /*
-     * AIR_TO_GROUND planning fields
+     * AIR_TO_GROUND fields
      */
     this.targetId = data.targetId || null;
-
     this.targetType = data.targetType || null;
 
     this.maximumAllowedTime = Number(
@@ -53,21 +43,25 @@ class Mission {
 
     this.aircraftSpeedKmph = Number(data.aircraftSpeedKmph || 900);
 
-    /*
-     * Planning result may recommend more than
-     * one aircraft.
-     *
-     * Current simulation still executes using
-     * one representative aircraft.
-     */
     this.requiredAircraftCount = Number(data.requiredAircraftCount || 1);
+
+    this.weaponInventory = {
+      ...(data.weaponInventory || {}),
+    };
+
+    this.weaponUsage = {
+      ...(data.weaponUsage || {}),
+    };
+
+    this.remainingWeaponInventory = {
+      ...(data.remainingWeaponInventory || {}),
+    };
 
     this.strikePlan = data.strikePlan || null;
 
     this.strikePlanningSummary = data.strikePlanningSummary || null;
 
     this.abortReason = data.abortReason || null;
-
     this.isCompleted = data.isCompleted || false;
 
     this.queueEnteredTime = data.queueEnteredTime ?? null;
@@ -107,14 +101,34 @@ class Mission {
     const bestPlan = planningResult.bestPlan;
 
     this.targetId = planningResult.target.id;
-
     this.targetType = planningResult.target.type;
 
     this.requiredAircraftCount = bestPlan.aircraftCount;
 
     this.duration = Math.ceil(bestPlan.sortieDuration);
 
-    this.strikePlan = bestPlan;
+    this.weaponInventory = {
+      ...(planningResult.weaponInventory || {}),
+    };
+
+    this.weaponUsage = this.calculateWeaponUsage(bestPlan);
+
+    this.remainingWeaponInventory = this.calculateRemainingInventory(
+      this.weaponInventory,
+      this.weaponUsage,
+    );
+
+    this.strikePlan = {
+      ...bestPlan,
+
+      weaponUsage: {
+        ...this.weaponUsage,
+      },
+
+      remainingWeaponInventory: {
+        ...this.remainingWeaponInventory,
+      },
+    };
 
     this.strikePlanningSummary = {
       generatedPlanCount: planningResult.generatedPlanCount,
@@ -129,26 +143,50 @@ class Mission {
     return true;
   }
 
+  calculateWeaponUsage(plan) {
+    const usage = {};
+
+    for (const weapon of plan.loadout || []) {
+      const totalUsed =
+        Number(weapon.quantityPerAircraft || 0) *
+        Number(plan.aircraftCount || 1);
+
+      usage[weapon.weaponType] = totalUsed;
+    }
+
+    return usage;
+  }
+
+  calculateRemainingInventory(inventory, usage) {
+    const remaining = {};
+
+    for (const [weaponType, quantity] of Object.entries(inventory || {})) {
+      remaining[weaponType] = Math.max(
+        0,
+        Number(quantity || 0) - Number(usage[weaponType] || 0),
+      );
+    }
+
+    return remaining;
+  }
+
   markReady() {
     this.status = MissionStatus.READY;
   }
 
   start(startTime = new Date()) {
     this.status = MissionStatus.IN_PROGRESS;
-
     this.actualStartTime = startTime;
   }
 
   complete(endTime = new Date()) {
     this.status = MissionStatus.COMPLETED;
-
     this.endTime = endTime;
     this.isCompleted = true;
   }
 
   abort(reason) {
     this.status = MissionStatus.ABORTED;
-
     this.abortReason = reason;
   }
 
@@ -174,11 +212,8 @@ class Mission {
       runwayId: this.runwayId,
 
       incomingTime: this.incomingTime,
-
       scheduledStartTime: this.scheduledStartTime,
-
       actualStartTime: this.actualStartTime,
-
       endTime: this.endTime,
 
       requiredPilotRating: this.requiredPilotRating,
@@ -193,6 +228,12 @@ class Mission {
       aircraftSpeedKmph: this.aircraftSpeedKmph,
 
       requiredAircraftCount: this.requiredAircraftCount,
+
+      weaponInventory: this.weaponInventory,
+
+      weaponUsage: this.weaponUsage,
+
+      remainingWeaponInventory: this.remainingWeaponInventory,
 
       strikePlan: this.strikePlan,
 

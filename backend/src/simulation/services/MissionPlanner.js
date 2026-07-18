@@ -1,6 +1,10 @@
 const { entities, enums } = require("../../domain");
 
-const { createAirToGroundPlanner, targets } = require("../../airToGround");
+const {
+  createAirToGroundPlanner,
+  targets,
+  weapons,
+} = require("../../airToGround");
 
 const { Mission } = entities;
 
@@ -50,8 +54,6 @@ class MissionPlanner {
   }
 
   createMissionFromRequest(request, index, scenario) {
-    console.log("CREATE MISSION REQUEST:", request.id, request.type);
-
     const incomingTime = Number(request.incomingTime ?? 0);
 
     const mission = new Mission({
@@ -64,7 +66,6 @@ class MissionPlanner {
       priority: request.priority || MissionPriority.MEDIUM,
 
       incomingTime,
-
       scheduledStartTime: incomingTime,
 
       requiredPilotRating: request.requiredPilotRating || PilotRating.WINGMAN,
@@ -80,6 +81,8 @@ class MissionPlanner {
       aircraftSpeedKmph: Number(
         request.aircraftSpeedKmph || scenario.aircraftSpeedKmph || 900,
       ),
+
+      weaponInventory: this.normalizeWeaponInventory(request.weaponInventory),
     });
 
     this.applyAirToGroundPlanning(mission, scenario);
@@ -88,13 +91,6 @@ class MissionPlanner {
   }
 
   applyAirToGroundPlanning(mission, scenario = {}) {
-    console.log(
-      "PLANNING CHECK:",
-      mission.id,
-      mission.type,
-      MissionType.AIR_TO_GROUND,
-    );
-
     if (mission.type !== MissionType.AIR_TO_GROUND) {
       return;
     }
@@ -105,26 +101,23 @@ class MissionPlanner {
 
     const planningResult = this.airToGroundPlanner.plan({
       targetId,
-
       maximumAllowedTime,
 
       aircraftSpeedKmph: mission.aircraftSpeedKmph,
 
       maxAircraft: Number(scenario.maxStrikeAircraft || 4),
-    });
 
-    console.log("PLANNING RESULT:", {
-      success: planningResult.success,
-      failureReason: planningResult.failureReason,
-      target: planningResult.target,
-      bestDuration: planningResult.bestPlan?.sortieDuration,
-      aircraftCount: planningResult.bestPlan?.aircraftCount,
+      weaponInventory: mission.weaponInventory,
     });
 
     if (!planningResult.success) {
       mission.abort(
         planningResult.failureReason || "AIR_TO_GROUND_PLANNING_FAILED",
       );
+
+      mission.weaponInventory = {
+        ...(planningResult.weaponInventory || mission.weaponInventory),
+      };
 
       mission.strikePlanningSummary = {
         failureReason: planningResult.failureReason,
@@ -138,14 +131,26 @@ class MissionPlanner {
     }
 
     mission.applyStrikePlan(planningResult);
-    console.log("MISSION AFTER STRIKE PLAN:", {
-      id: mission.id,
-      duration: mission.duration,
-      targetId: mission.targetId,
-      targetType: mission.targetType,
-      requiredAircraftCount: mission.requiredAircraftCount,
-      hasStrikePlan: Boolean(mission.strikePlan),
-    });
+  }
+
+  normalizeWeaponInventory(inventory = {}) {
+    const normalized = {};
+
+    for (const weapon of weapons) {
+      const value = inventory?.[weapon.type] ?? inventory?.[weapon.id];
+
+      const quantity =
+        value !== undefined && value !== null && value !== ""
+          ? Number(value)
+          : Number(weapon.defaultAvailableQuantity || 0);
+
+      normalized[weapon.type] = Math.max(
+        0,
+        Number.isFinite(quantity) ? Math.floor(quantity) : 0,
+      );
+    }
+
+    return normalized;
   }
 
   createRandomMissions(count = 5, scenario = {}) {
@@ -196,6 +201,10 @@ class MissionPlanner {
         targetType: randomTarget?.type || null,
 
         aircraftSpeedKmph: Number(scenario.aircraftSpeedKmph || 900),
+
+        weaponInventory: this.normalizeWeaponInventory(
+          scenario.weaponInventory,
+        ),
       });
 
       this.applyAirToGroundPlanning(mission, scenario);
@@ -263,36 +272,27 @@ class MissionPlanner {
   }
 
   getRandomDuration(type, priority) {
-    const durationRangesByType = {
+    const ranges = {
       [MissionType.TRAINING]: [45, 90],
-
       [MissionType.AIR_TO_AIR]: [75, 150],
-
       [MissionType.AIR_TO_GROUND]: [90, 180],
-
       [MissionType.RECONNAISSANCE]: [90, 210],
-
       [MissionType.DEFENSIVE_PATROL]: [120, 240],
-
       [MissionType.OFFENSIVE_PATROL]: [120, 240],
-
       [MissionType.ESCORT]: [90, 180],
-
       [MissionType.INTERCEPTION]: [45, 120],
     };
 
-    const [min, max] = durationRangesByType[type] || [60, 120];
+    const [min, max] = ranges[type] || [60, 120];
 
-    const priorityDurationBoost = {
+    const boost = {
       [MissionPriority.LOW]: 0,
       [MissionPriority.MEDIUM]: 10,
       [MissionPriority.HIGH]: 20,
       [MissionPriority.CRITICAL]: 30,
     };
 
-    return (
-      this.randomInteger(min, max) + (priorityDurationBoost[priority] || 0)
-    );
+    return this.randomInteger(min, max) + (boost[priority] || 0);
   }
 
   getRandomIncomingTime(simulationDuration, duration) {

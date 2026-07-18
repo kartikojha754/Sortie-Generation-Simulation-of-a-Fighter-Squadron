@@ -474,11 +474,8 @@ class SimulationService {
       priority: mission.priority,
 
       aircraftId: mission.aircraftIds[0],
-
       pilotId: mission.pilotIds[0],
-
       groundCrewIds: mission.groundCrewIds,
-
       runwayId: mission.runwayId,
 
       requiredPilotRating: mission.requiredPilotRating,
@@ -486,8 +483,13 @@ class SimulationService {
       requiredAircraftCount: mission.requiredAircraftCount,
 
       targetId: mission.targetId,
-
       targetType: mission.targetType,
+
+      weaponInventory: mission.weaponInventory,
+
+      weaponUsage: mission.weaponUsage,
+
+      remainingWeaponInventory: mission.remainingWeaponInventory,
 
       strikePlan: mission.strikePlan,
 

@@ -5,19 +5,13 @@ class Sortie {
     this.id = data.id || null;
 
     this.missionId = data.missionId || null;
-
     this.missionName = data.missionName || "";
-
     this.missionType = data.missionType || null;
-
     this.priority = data.priority || null;
 
     this.aircraftId = data.aircraftId || null;
-
     this.pilotId = data.pilotId || null;
-
     this.groundCrewIds = data.groundCrewIds || [];
-
     this.runwayId = data.runwayId || null;
 
     this.requiredPilotRating = data.requiredPilotRating || null;
@@ -25,8 +19,19 @@ class Sortie {
     this.requiredAircraftCount = Number(data.requiredAircraftCount || 1);
 
     this.targetId = data.targetId || null;
-
     this.targetType = data.targetType || null;
+
+    this.weaponInventory = {
+      ...(data.weaponInventory || {}),
+    };
+
+    this.weaponUsage = {
+      ...(data.weaponUsage || {}),
+    };
+
+    this.remainingWeaponInventory = {
+      ...(data.remainingWeaponInventory || {}),
+    };
 
     this.strikePlan = data.strikePlan || null;
 
@@ -87,9 +92,7 @@ class Sortie {
 
       aircraftId: this.aircraftId,
       pilotId: this.pilotId,
-
       groundCrewIds: this.groundCrewIds,
-
       runwayId: this.runwayId,
 
       requiredPilotRating: this.requiredPilotRating,
@@ -98,6 +101,13 @@ class Sortie {
 
       targetId: this.targetId,
       targetType: this.targetType,
+
+      weaponInventory: this.weaponInventory,
+
+      weaponUsage: this.weaponUsage,
+
+      remainingWeaponInventory: this.remainingWeaponInventory,
+
       strikePlan: this.strikePlan,
 
       takeoffTime: this.takeoffTime,

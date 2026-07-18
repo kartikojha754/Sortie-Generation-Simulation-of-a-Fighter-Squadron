@@ -1,6 +1,13 @@
 class AirToGroundPlanner {
-  constructor({ targets, combinationGenerator, planEvaluator, planOptimizer }) {
+  constructor({
+    targets,
+    weapons,
+    combinationGenerator,
+    planEvaluator,
+    planOptimizer,
+  }) {
     this.targets = targets;
+    this.weapons = weapons;
     this.combinationGenerator = combinationGenerator;
     this.planEvaluator = planEvaluator;
     this.planOptimizer = planOptimizer;
@@ -11,6 +18,7 @@ class AirToGroundPlanner {
     maximumAllowedTime,
     aircraftSpeedKmph = 900,
     maxAircraft = 4,
+    weaponInventory = {},
   }) {
     const target = this.findTarget(targetId);
 
@@ -19,7 +27,9 @@ class AirToGroundPlanner {
         success: false,
         failureReason: "TARGET_NOT_FOUND",
         target: null,
+        weaponInventory: {},
         results: [],
+        generatedPlanCount: 0,
         validPlanCount: 0,
         bestPlan: null,
         fastestPlan: null,
@@ -27,9 +37,28 @@ class AirToGroundPlanner {
       };
     }
 
+    const normalizedInventory =
+      this.combinationGenerator.normalizeInventory(weaponInventory);
+
     const combinations = this.combinationGenerator.generate({
       maxAircraft,
+      weaponInventory: normalizedInventory,
     });
+
+    if (combinations.length === 0) {
+      return {
+        success: false,
+        failureReason: "WEAPON_INVENTORY_UNAVAILABLE",
+        target,
+        weaponInventory: normalizedInventory,
+        results: [],
+        generatedPlanCount: 0,
+        validPlanCount: 0,
+        bestPlan: null,
+        fastestPlan: null,
+        lowestResourcePlan: null,
+      };
+    }
 
     const results = combinations.map((combination) =>
       this.planEvaluator.evaluate({
@@ -47,6 +76,7 @@ class AirToGroundPlanner {
         success: false,
         failureReason: "TIME_CONSTRAINT_EXCEEDED",
         target,
+        weaponInventory: normalizedInventory,
         generatedPlanCount: results.length,
         validPlanCount: 0,
         results,
@@ -58,8 +88,11 @@ class AirToGroundPlanner {
       success: true,
       failureReason: null,
       target,
+      weaponInventory: normalizedInventory,
       generatedPlanCount: results.length,
+
       validPlanCount: results.filter((result) => result.valid).length,
+
       results,
       ...optimized,
     };
