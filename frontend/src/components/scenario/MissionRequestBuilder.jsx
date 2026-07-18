@@ -23,9 +23,57 @@ const pilotRatingOptions = [
   { value: "TRAINEE", label: "Trainee" },
   { value: "WINGMAN", label: "Wingman" },
   { value: "FLIGHT_LEAD", label: "Flight Lead" },
-  { value: "FOUR_SHIP_LEAD", label: "Four Ship Lead" },
+  {
+    value: "FOUR_SHIP_LEAD",
+    label: "Four Ship Lead",
+  },
   { value: "INSTRUCTOR", label: "Instructor" },
 ];
+
+const targetOptions = [
+  {
+    value: "TARGET-RADAR-STATION",
+    label: "Radar Station",
+  },
+  {
+    value: "TARGET-FUEL-STORAGE",
+    label: "Fuel Storage",
+  },
+  {
+    value: "TARGET-SUPPLY-DEPOT",
+    label: "Supply Depot",
+  },
+  {
+    value: "TARGET-AIRCRAFT-HANGAR",
+    label: "Aircraft Hangar",
+  },
+  {
+    value: "TARGET-BRIDGE",
+    label: "Bridge",
+  },
+  {
+    value: "TARGET-COMMAND-CENTER",
+    label: "Command Center",
+  },
+  {
+    value: "TARGET-FORTIFIED-BUNKER",
+    label: "Fortified Bunker",
+  },
+];
+
+const defaultWeaponInventory = {
+  AIRCRAFT_GUN: 4,
+  LIGHT_BOMB: 8,
+  HEAVY_BOMB: 4,
+  AIR_TO_GROUND_MISSILE: 6,
+  HEAVY_AIR_TO_GROUND_MISSILE: 2,
+};
+
+function getInventoryValue(mission, weaponType) {
+  return (
+    mission.weaponInventory?.[weaponType] ?? defaultWeaponInventory[weaponType]
+  );
+}
 
 export default function MissionRequestBuilder() {
   const {
@@ -37,6 +85,15 @@ export default function MissionRequestBuilder() {
   } = useScenario();
 
   const missions = scenario.missionRequests || [];
+
+  function updateInventory(missionIndex, mission, weaponType, value) {
+    updateMissionRequest(missionIndex, "weaponInventory", {
+      ...defaultWeaponInventory,
+      ...(mission.weaponInventory || {}),
+
+      [weaponType]: Math.max(0, Number(value || 0)),
+    });
+  }
 
   return (
     <Card>
@@ -51,8 +108,7 @@ export default function MissionRequestBuilder() {
           </h3>
 
           <p className="mt-1 text-sm text-slate-500">
-            Add missions with type, priority, incoming time, required pilot
-            rating, and duration.
+            Configure missions, targets and available weapon inventory.
           </p>
         </div>
 
@@ -101,7 +157,7 @@ export default function MissionRequestBuilder() {
                 <Input
                   label="Mission Name"
                   value={mission.name}
-                  placeholder="Example: Air Combat Training"
+                  placeholder="Example: Destroy Radar Station"
                   onChange={(e) =>
                     updateMissionRequest(index, "name", e.target.value)
                   }
@@ -152,14 +208,146 @@ export default function MissionRequestBuilder() {
                 <Input
                   type="number"
                   min="1"
-                  label="Duration"
-                  helperText="Mission duration in minutes."
+                  label={
+                    mission.type === "AIR_TO_GROUND"
+                      ? "Maximum Mission Time"
+                      : "Duration"
+                  }
+                  helperText={
+                    mission.type === "AIR_TO_GROUND"
+                      ? "Maximum permitted strike duration."
+                      : "Mission duration in minutes."
+                  }
                   value={mission.duration}
                   onChange={(e) =>
                     updateMissionRequest(index, "duration", e.target.value)
                   }
                 />
               </div>
+
+              {mission.type === "AIR_TO_GROUND" && (
+                <div className="mt-6 rounded-xl border border-green-800/40 bg-green-950/10 p-4">
+                  <div className="mb-4">
+                    <p className="text-xs uppercase tracking-[0.22em] text-green-400">
+                      Strike Configuration
+                    </p>
+
+                    <h5 className="mt-1 font-semibold text-slate-100">
+                      Target and Weapon Inventory
+                    </h5>
+
+                    <p className="mt-1 text-xs text-slate-500">
+                      The optimizer will only use the entered weapon quantities.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                    <Select
+                      label="Target"
+                      options={targetOptions}
+                      value={mission.targetId || "TARGET-RADAR-STATION"}
+                      onChange={(e) =>
+                        updateMissionRequest(index, "targetId", e.target.value)
+                      }
+                    />
+
+                    <Input
+                      type="number"
+                      min="1"
+                      label="Aircraft Speed (km/h)"
+                      value={mission.aircraftSpeedKmph || 900}
+                      onChange={(e) =>
+                        updateMissionRequest(
+                          index,
+                          "aircraftSpeedKmph",
+                          Number(e.target.value),
+                        )
+                      }
+                    />
+
+                    <Input
+                      type="number"
+                      min="0"
+                      label="Aircraft Guns Available"
+                      value={getInventoryValue(mission, "AIRCRAFT_GUN")}
+                      onChange={(e) =>
+                        updateInventory(
+                          index,
+                          mission,
+                          "AIRCRAFT_GUN",
+                          e.target.value,
+                        )
+                      }
+                    />
+
+                    <Input
+                      type="number"
+                      min="0"
+                      label="Light Bombs Available"
+                      value={getInventoryValue(mission, "LIGHT_BOMB")}
+                      onChange={(e) =>
+                        updateInventory(
+                          index,
+                          mission,
+                          "LIGHT_BOMB",
+                          e.target.value,
+                        )
+                      }
+                    />
+
+                    <Input
+                      type="number"
+                      min="0"
+                      label="Heavy Bombs Available"
+                      value={getInventoryValue(mission, "HEAVY_BOMB")}
+                      onChange={(e) =>
+                        updateInventory(
+                          index,
+                          mission,
+                          "HEAVY_BOMB",
+                          e.target.value,
+                        )
+                      }
+                    />
+
+                    <Input
+                      type="number"
+                      min="0"
+                      label="AG Missiles Available"
+                      value={getInventoryValue(
+                        mission,
+                        "AIR_TO_GROUND_MISSILE",
+                      )}
+                      onChange={(e) =>
+                        updateInventory(
+                          index,
+                          mission,
+                          "AIR_TO_GROUND_MISSILE",
+                          e.target.value,
+                        )
+                      }
+                    />
+
+                    <Input
+                      type="number"
+                      min="0"
+                      label="Heavy AG Missiles Available"
+                      value={getInventoryValue(
+                        mission,
+                        "HEAVY_AIR_TO_GROUND_MISSILE",
+                      )}
+                      onChange={(e) =>
+                        updateInventory(
+                          index,
+                          mission,
+                          "HEAVY_AIR_TO_GROUND_MISSILE",
+                          e.target.value,
+                        )
+                      }
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
