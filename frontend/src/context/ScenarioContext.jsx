@@ -104,7 +104,10 @@ export function ScenarioProvider({ children }) {
           ? {
               ...mission,
               [field]:
-                field === "incomingTime" || field === "duration"
+                field === "incomingTime" ||
+                field === "duration" ||
+                field === "aircraftSpeedKmph" ||
+                field === "requiredDamagePercentage"
                   ? Math.max(0, Number(value))
                   : value,
             }

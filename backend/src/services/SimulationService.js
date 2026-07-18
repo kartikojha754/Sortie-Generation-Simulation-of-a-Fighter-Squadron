@@ -485,11 +485,7 @@ class SimulationService {
       targetId: mission.targetId,
       targetType: mission.targetType,
 
-      weaponInventory: mission.weaponInventory,
-
-      weaponUsage: mission.weaponUsage,
-
-      remainingWeaponInventory: mission.remainingWeaponInventory,
+      requiredDamagePercentage: mission.requiredDamagePercentage,
 
       strikePlan: mission.strikePlan,
 

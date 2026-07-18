@@ -10,55 +10,30 @@ class StrikePlanOptimizer {
       };
     }
 
-    const bestPlan = [...validPlans].sort((a, b) =>
-      this.compareBestPlans(a, b),
+    const bestPlan = [...validPlans].sort((a, b) => this.compareBestPlans(a, b))[0];
+    const fastestPlan = [...validPlans].sort(
+      (a, b) =>
+        a.sortieDuration - b.sortieDuration ||
+        a.aircraftCount - b.aircraftCount ||
+        a.totalWeaponCount - b.totalWeaponCount,
+    )[0];
+    const lowestResourcePlan = [...validPlans].sort(
+      (a, b) =>
+        a.aircraftCount - b.aircraftCount ||
+        a.totalWeaponCount - b.totalWeaponCount ||
+        a.sortieDuration - b.sortieDuration,
     )[0];
 
-    const fastestPlan = [...validPlans].sort((a, b) => {
-      if (a.sortieDuration !== b.sortieDuration) {
-        return a.sortieDuration - b.sortieDuration;
-      }
-
-      if (a.aircraftCount !== b.aircraftCount) {
-        return a.aircraftCount - b.aircraftCount;
-      }
-
-      return a.totalWeaponCount - b.totalWeaponCount;
-    })[0];
-
-    const lowestResourcePlan = [...validPlans].sort((a, b) => {
-      if (a.aircraftCount !== b.aircraftCount) {
-        return a.aircraftCount - b.aircraftCount;
-      }
-
-      if (a.totalWeaponCount !== b.totalWeaponCount) {
-        return a.totalWeaponCount - b.totalWeaponCount;
-      }
-
-      return a.sortieDuration - b.sortieDuration;
-    })[0];
-
-    return {
-      bestPlan,
-      fastestPlan,
-      lowestResourcePlan,
-    };
+    return { bestPlan, fastestPlan, lowestResourcePlan };
   }
 
   compareBestPlans(a, b) {
-    if (a.aircraftCount !== b.aircraftCount) {
-      return a.aircraftCount - b.aircraftCount;
-    }
-
-    if (a.totalWeaponCount !== b.totalWeaponCount) {
-      return a.totalWeaponCount - b.totalWeaponCount;
-    }
-
-    if (a.sortieDuration !== b.sortieDuration) {
-      return a.sortieDuration - b.sortieDuration;
-    }
-
-    return b.totalAttackPower - a.totalAttackPower;
+    return (
+      a.aircraftCount - b.aircraftCount ||
+      a.totalWeaponCount - b.totalWeaponCount ||
+      a.sortieDuration - b.sortieDuration ||
+      b.achievedDamagePercentage - a.achievedDamagePercentage
+    );
   }
 }
 

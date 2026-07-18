@@ -6,12 +6,14 @@ import {
   MdSettings,
   MdTimeline,
   MdHistory,
+  MdTableChart,
 } from "react-icons/md";
 
 const navItems = [
   { label: "Scenario Builder", path: "/scenario-builder", icon: MdBuild },
   { label: "Dashboard", path: "/dashboard", icon: MdDashboard },
   { label: "Simulation", path: "/simulation", icon: MdOutlineScience },
+  { label: "Strike Analysis", path: "/strike-analysis", icon: MdTableChart },
   { label: "Scheduler", path: "/scheduler", icon: MdTimeline },
   { label: "Maintenance", path: "/maintenance", icon: MdSettings },
   { label: "History", path: "/history", icon: MdHistory },

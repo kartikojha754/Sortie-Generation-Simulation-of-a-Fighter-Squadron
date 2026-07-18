@@ -6,6 +6,7 @@ import Simulation from "../pages/Simulation";
 import SchedulerTimeline from "../pages/SchedulerTimeline";
 import Maintenance from "../pages/Maintenance";
 import History from "../pages/History";
+import StrikeAnalysis from "../pages/StrikeAnalysis";
 
 export default function AppRoutes() {
   return (
@@ -15,6 +16,7 @@ export default function AppRoutes() {
         <Route path="scenario-builder" element={<ScenarioBuilder />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="simulation" element={<Simulation />} />
+        <Route path="strike-analysis" element={<StrikeAnalysis />} />
         <Route path="scheduler" element={<SchedulerTimeline />} />
         <Route path="maintenance" element={<Maintenance />} />
         <Route path="history" element={<History />} />

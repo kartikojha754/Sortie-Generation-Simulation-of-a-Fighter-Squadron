@@ -3,7 +3,6 @@ const { entities, enums } = require("../../domain");
 const {
   createAirToGroundPlanner,
   targets,
-  weapons,
 } = require("../../airToGround");
 
 const { Mission } = entities;
@@ -82,7 +81,9 @@ class MissionPlanner {
         request.aircraftSpeedKmph || scenario.aircraftSpeedKmph || 900,
       ),
 
-      weaponInventory: this.normalizeWeaponInventory(request.weaponInventory),
+      requiredDamagePercentage: Number(
+        request.requiredDamagePercentage || 100,
+      ),
     });
 
     this.applyAirToGroundPlanning(mission, scenario);
@@ -107,7 +108,7 @@ class MissionPlanner {
 
       maxAircraft: Number(scenario.maxStrikeAircraft || 4),
 
-      weaponInventory: mission.weaponInventory,
+      requiredDamagePercentage: mission.requiredDamagePercentage,
     });
 
     if (!planningResult.success) {
@@ -115,42 +116,20 @@ class MissionPlanner {
         planningResult.failureReason || "AIR_TO_GROUND_PLANNING_FAILED",
       );
 
-      mission.weaponInventory = {
-        ...(planningResult.weaponInventory || mission.weaponInventory),
-      };
 
       mission.strikePlanningSummary = {
         failureReason: planningResult.failureReason,
 
         generatedPlanCount: planningResult.generatedPlanCount || 0,
 
-        validPlanCount: 0,
+        validPlanCount: planningResult.validPlanCount || 0,
+        results: planningResult.results || [],
       };
 
       return;
     }
 
     mission.applyStrikePlan(planningResult);
-  }
-
-  normalizeWeaponInventory(inventory = {}) {
-    const normalized = {};
-
-    for (const weapon of weapons) {
-      const value = inventory?.[weapon.type] ?? inventory?.[weapon.id];
-
-      const quantity =
-        value !== undefined && value !== null && value !== ""
-          ? Number(value)
-          : Number(weapon.defaultAvailableQuantity || 0);
-
-      normalized[weapon.type] = Math.max(
-        0,
-        Number.isFinite(quantity) ? Math.floor(quantity) : 0,
-      );
-    }
-
-    return normalized;
   }
 
   createRandomMissions(count = 5, scenario = {}) {
@@ -202,8 +181,8 @@ class MissionPlanner {
 
         aircraftSpeedKmph: Number(scenario.aircraftSpeedKmph || 900),
 
-        weaponInventory: this.normalizeWeaponInventory(
-          scenario.weaponInventory,
+        requiredDamagePercentage: Number(
+          scenario.requiredDamagePercentage || 100,
         ),
       });
 

@@ -21,17 +21,9 @@ class Sortie {
     this.targetId = data.targetId || null;
     this.targetType = data.targetType || null;
 
-    this.weaponInventory = {
-      ...(data.weaponInventory || {}),
-    };
-
-    this.weaponUsage = {
-      ...(data.weaponUsage || {}),
-    };
-
-    this.remainingWeaponInventory = {
-      ...(data.remainingWeaponInventory || {}),
-    };
+    this.requiredDamagePercentage = Number(
+      data.requiredDamagePercentage || 100,
+    );
 
     this.strikePlan = data.strikePlan || null;
 
@@ -102,11 +94,7 @@ class Sortie {
       targetId: this.targetId,
       targetType: this.targetType,
 
-      weaponInventory: this.weaponInventory,
-
-      weaponUsage: this.weaponUsage,
-
-      remainingWeaponInventory: this.remainingWeaponInventory,
+      requiredDamagePercentage: this.requiredDamagePercentage,
 
       strikePlan: this.strikePlan,
 
