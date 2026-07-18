@@ -5,22 +5,38 @@ class Sortie {
     this.id = data.id || null;
 
     this.missionId = data.missionId || null;
+
     this.missionName = data.missionName || "";
+
     this.missionType = data.missionType || null;
+
     this.priority = data.priority || null;
 
     this.aircraftId = data.aircraftId || null;
+
     this.pilotId = data.pilotId || null;
+
     this.groundCrewIds = data.groundCrewIds || [];
+
     this.runwayId = data.runwayId || null;
 
     this.requiredPilotRating = data.requiredPilotRating || null;
 
+    this.requiredAircraftCount = Number(data.requiredAircraftCount || 1);
+
+    this.targetId = data.targetId || null;
+
+    this.targetType = data.targetType || null;
+
+    this.strikePlan = data.strikePlan || null;
+
     this.takeoffTime = data.takeoffTime ?? null;
+
     this.landingTime = data.landingTime ?? null;
 
     this.plannedDuration = data.plannedDuration || 0;
-    this.actualDuration = data.actualDuration || null;
+
+    this.actualDuration = data.actualDuration ?? null;
 
     this.successful = data.successful !== undefined ? data.successful : false;
 
@@ -71,15 +87,24 @@ class Sortie {
 
       aircraftId: this.aircraftId,
       pilotId: this.pilotId,
+
       groundCrewIds: this.groundCrewIds,
+
       runwayId: this.runwayId,
 
       requiredPilotRating: this.requiredPilotRating,
+
+      requiredAircraftCount: this.requiredAircraftCount,
+
+      targetId: this.targetId,
+      targetType: this.targetType,
+      strikePlan: this.strikePlan,
 
       takeoffTime: this.takeoffTime,
       landingTime: this.landingTime,
 
       plannedDuration: this.plannedDuration,
+
       actualDuration: this.actualDuration,
 
       successful: this.successful,

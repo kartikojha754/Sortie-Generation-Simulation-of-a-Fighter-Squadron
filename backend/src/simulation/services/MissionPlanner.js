@@ -1,9 +1,16 @@
 const { entities, enums } = require("../../domain");
 
+const { createAirToGroundPlanner, targets } = require("../../airToGround");
+
 const { Mission } = entities;
+
 const { MissionType, MissionPriority, PilotRating } = enums;
 
 class MissionPlanner {
+  constructor() {
+    this.airToGroundPlanner = createAirToGroundPlanner();
+  }
+
   createMissions(count = 5, scenario = {}) {
     const missionCount = Number(count || 5);
 
@@ -15,21 +22,9 @@ class MissionPlanner {
       Array.isArray(scenario.missionRequests) &&
       scenario.missionRequests.length > 0
     ) {
-      return scenario.missionRequests.map((request, index) => {
-        const incomingTime = Number(request.incomingTime ?? 0);
-
-        return new Mission({
-          id: request.id || `MIS-${index + 1}`,
-          name: request.name || `Mission ${index + 1}`,
-          type: request.type || MissionType.TRAINING,
-          priority: request.priority || MissionPriority.MEDIUM,
-          incomingTime,
-          scheduledStartTime: incomingTime,
-          requiredPilotRating:
-            request.requiredPilotRating || PilotRating.WINGMAN,
-          duration: Number(request.duration || 90),
-        });
-      });
+      return scenario.missionRequests.map((request, index) =>
+        this.createMissionFromRequest(request, index, scenario),
+      );
     }
 
     const missions = [];
@@ -54,8 +49,108 @@ class MissionPlanner {
     return missions;
   }
 
+  createMissionFromRequest(request, index, scenario) {
+    console.log("CREATE MISSION REQUEST:", request.id, request.type);
+
+    const incomingTime = Number(request.incomingTime ?? 0);
+
+    const mission = new Mission({
+      id: request.id || `MIS-${index + 1}`,
+
+      name: request.name || `Mission ${index + 1}`,
+
+      type: request.type || MissionType.TRAINING,
+
+      priority: request.priority || MissionPriority.MEDIUM,
+
+      incomingTime,
+
+      scheduledStartTime: incomingTime,
+
+      requiredPilotRating: request.requiredPilotRating || PilotRating.WINGMAN,
+
+      duration: Number(request.duration || 90),
+
+      maximumAllowedTime: Number(request.duration || 90),
+
+      targetId: request.targetId || request.targetType || null,
+
+      targetType: request.targetType || null,
+
+      aircraftSpeedKmph: Number(
+        request.aircraftSpeedKmph || scenario.aircraftSpeedKmph || 900,
+      ),
+    });
+
+    this.applyAirToGroundPlanning(mission, scenario);
+
+    return mission;
+  }
+
+  applyAirToGroundPlanning(mission, scenario = {}) {
+    console.log(
+      "PLANNING CHECK:",
+      mission.id,
+      mission.type,
+      MissionType.AIR_TO_GROUND,
+    );
+
+    if (mission.type !== MissionType.AIR_TO_GROUND) {
+      return;
+    }
+
+    const targetId = mission.targetId || mission.targetType || targets[0]?.id;
+
+    const maximumAllowedTime = mission.maximumAllowedTime || mission.duration;
+
+    const planningResult = this.airToGroundPlanner.plan({
+      targetId,
+
+      maximumAllowedTime,
+
+      aircraftSpeedKmph: mission.aircraftSpeedKmph,
+
+      maxAircraft: Number(scenario.maxStrikeAircraft || 4),
+    });
+
+    console.log("PLANNING RESULT:", {
+      success: planningResult.success,
+      failureReason: planningResult.failureReason,
+      target: planningResult.target,
+      bestDuration: planningResult.bestPlan?.sortieDuration,
+      aircraftCount: planningResult.bestPlan?.aircraftCount,
+    });
+
+    if (!planningResult.success) {
+      mission.abort(
+        planningResult.failureReason || "AIR_TO_GROUND_PLANNING_FAILED",
+      );
+
+      mission.strikePlanningSummary = {
+        failureReason: planningResult.failureReason,
+
+        generatedPlanCount: planningResult.generatedPlanCount || 0,
+
+        validPlanCount: 0,
+      };
+
+      return;
+    }
+
+    mission.applyStrikePlan(planningResult);
+    console.log("MISSION AFTER STRIKE PLAN:", {
+      id: mission.id,
+      duration: mission.duration,
+      targetId: mission.targetId,
+      targetType: mission.targetType,
+      requiredAircraftCount: mission.requiredAircraftCount,
+      hasStrikePlan: Boolean(mission.strikePlan),
+    });
+  }
+
   createRandomMissions(count = 5, scenario = {}) {
     const missionCount = Math.max(1, Number(count || 5));
+
     const simulationDuration = Math.max(
       60,
       Number(scenario.simulationDuration || 1440),
@@ -65,26 +160,47 @@ class MissionPlanner {
 
     for (let i = 1; i <= missionCount; i++) {
       const type = this.getRandomMissionType();
+
       const priority = this.getRandomMissionPriority();
+
       const requiredPilotRating = this.getRandomPilotRating(priority);
+
       const duration = this.getRandomDuration(type, priority);
+
       const incomingTime = this.getRandomIncomingTime(
         simulationDuration,
         duration,
       );
 
-      missions.push(
-        new Mission({
-          id: `MIS-${i}`,
-          name: `${this.formatMissionName(type)} ${i}`,
-          type,
-          priority,
-          incomingTime,
-          scheduledStartTime: incomingTime,
-          requiredPilotRating,
-          duration,
-        }),
-      );
+      const randomTarget =
+        type === MissionType.AIR_TO_GROUND ? this.pickRandom(targets) : null;
+
+      const mission = new Mission({
+        id: `MIS-${i}`,
+
+        name: `${this.formatMissionName(type)} ${i}`,
+
+        type,
+        priority,
+        incomingTime,
+
+        scheduledStartTime: incomingTime,
+
+        requiredPilotRating,
+        duration,
+
+        maximumAllowedTime: duration,
+
+        targetId: randomTarget?.id || null,
+
+        targetType: randomTarget?.type || null,
+
+        aircraftSpeedKmph: Number(scenario.aircraftSpeedKmph || 900),
+      });
+
+      this.applyAirToGroundPlanning(mission, scenario);
+
+      missions.push(mission);
     }
 
     return missions.sort((a, b) => a.incomingTime - b.incomingTime);
@@ -96,10 +212,22 @@ class MissionPlanner {
 
   getRandomMissionPriority() {
     return this.pickWeighted([
-      { value: MissionPriority.LOW, weight: 25 },
-      { value: MissionPriority.MEDIUM, weight: 40 },
-      { value: MissionPriority.HIGH, weight: 25 },
-      { value: MissionPriority.CRITICAL, weight: 10 },
+      {
+        value: MissionPriority.LOW,
+        weight: 25,
+      },
+      {
+        value: MissionPriority.MEDIUM,
+        weight: 40,
+      },
+      {
+        value: MissionPriority.HIGH,
+        weight: 25,
+      },
+      {
+        value: MissionPriority.CRITICAL,
+        weight: 10,
+      },
     ]);
   }
 
@@ -110,16 +238,19 @@ class MissionPlanner {
         PilotRating.WINGMAN,
         PilotRating.FLIGHT_LEAD,
       ],
+
       [MissionPriority.MEDIUM]: [
         PilotRating.WINGMAN,
         PilotRating.FLIGHT_LEAD,
         PilotRating.FOUR_SHIP_LEAD,
       ],
+
       [MissionPriority.HIGH]: [
         PilotRating.FLIGHT_LEAD,
         PilotRating.FOUR_SHIP_LEAD,
         PilotRating.INSTRUCTOR,
       ],
+
       [MissionPriority.CRITICAL]: [
         PilotRating.FOUR_SHIP_LEAD,
         PilotRating.INSTRUCTOR,
@@ -134,12 +265,19 @@ class MissionPlanner {
   getRandomDuration(type, priority) {
     const durationRangesByType = {
       [MissionType.TRAINING]: [45, 90],
+
       [MissionType.AIR_TO_AIR]: [75, 150],
+
       [MissionType.AIR_TO_GROUND]: [90, 180],
+
       [MissionType.RECONNAISSANCE]: [90, 210],
+
       [MissionType.DEFENSIVE_PATROL]: [120, 240],
+
       [MissionType.OFFENSIVE_PATROL]: [120, 240],
+
       [MissionType.ESCORT]: [90, 180],
+
       [MissionType.INTERCEPTION]: [45, 120],
     };
 
@@ -159,6 +297,7 @@ class MissionPlanner {
 
   getRandomIncomingTime(simulationDuration, duration) {
     const latestUsefulArrival = Math.max(0, simulationDuration - duration - 60);
+
     return this.randomInteger(0, latestUsefulArrival);
   }
 
@@ -176,11 +315,15 @@ class MissionPlanner {
 
   pickWeighted(options) {
     const totalWeight = options.reduce((sum, option) => sum + option.weight, 0);
+
     let randomValue = Math.random() * totalWeight;
 
     for (const option of options) {
       randomValue -= option.weight;
-      if (randomValue <= 0) return option.value;
+
+      if (randomValue <= 0) {
+        return option.value;
+      }
     }
 
     return options[options.length - 1].value;

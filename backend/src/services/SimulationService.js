@@ -174,10 +174,21 @@ class SimulationService {
       this.log(context, {
         time: event.time,
         type: "SORTIE_TAKEOFF",
+
         missionId: mission.id,
         sortieId: sortie.id,
+
         aircraftId: mission.aircraftIds[0],
+
         pilotId: mission.pilotIds[0],
+
+        requiredAircraftCount: mission.requiredAircraftCount,
+
+        targetId: mission.targetId,
+
+        targetType: mission.targetType,
+
+        strikePlan: mission.strikePlan,
       });
 
       engine.scheduleEvent(
@@ -456,17 +467,29 @@ class SimulationService {
   createSortieFromMission(mission, takeoffTime) {
     const sortie = new Sortie({
       id: `SOR-${mission.id}`,
+
       missionId: mission.id,
       missionName: mission.name,
       missionType: mission.type,
       priority: mission.priority,
 
       aircraftId: mission.aircraftIds[0],
+
       pilotId: mission.pilotIds[0],
+
       groundCrewIds: mission.groundCrewIds,
+
       runwayId: mission.runwayId,
 
       requiredPilotRating: mission.requiredPilotRating,
+
+      requiredAircraftCount: mission.requiredAircraftCount,
+
+      targetId: mission.targetId,
+
+      targetType: mission.targetType,
+
+      strikePlan: mission.strikePlan,
 
       plannedDuration:
         mission.duration || SimulationConstants.DEFAULT_SORTIE_DURATION,
