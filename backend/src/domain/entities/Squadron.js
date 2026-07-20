@@ -32,6 +32,9 @@ class Squadron {
 
         this.weather =
             data.weather || null;
+
+        this.weaponInventory = data.weaponInventory || {};
+        this.weaponInventorySummary = data.weaponInventorySummary || null;
     }
 
     /**
@@ -116,7 +119,9 @@ class Squadron {
             groundCrew: this.groundCrew,
             runways: this.runways,
             maintenanceRecords: this.maintenanceRecords,
-            weather: this.weather
+            weather: this.weather,
+            weaponInventory: this.weaponInventory,
+            weaponInventorySummary: this.weaponInventorySummary
         };
     }
 }

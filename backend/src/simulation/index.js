@@ -2,6 +2,7 @@ const SimulationClock = require("./core/SimulationClock");
 const EventQueue = require("./core/EventQueue");
 const EventProcessor = require("./core/EventProcessor");
 const SimulationEngine = require("./core/SimulationEngine");
+const PendingMissionQueue = require("./core/PendingMissionQueue");
 
 const SimulationEvent = require("./events/SimulationEvent");
 const EventFactory = require("./events/EventFactory");
@@ -13,12 +14,14 @@ const WeatherManager = require("./services/WeatherManager");
 const WeatherRiskEvaluator = require("./services/WeatherRiskEvaluator");
 const MaintenanceScheduler = require("./services/MaintenanceScheduler");
 const StatisticsCollector = require("./services/StatisticsCollector");
+const WeaponInventoryManager = require("./services/WeaponInventoryManager");
 
 module.exports = {
   SimulationClock,
   EventQueue,
   EventProcessor,
   SimulationEngine,
+  PendingMissionQueue,
 
   SimulationEvent,
   EventFactory,
@@ -30,4 +33,5 @@ module.exports = {
   WeatherRiskEvaluator,
   MaintenanceScheduler,
   StatisticsCollector,
+  WeaponInventoryManager,
 };

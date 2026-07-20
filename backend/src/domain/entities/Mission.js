@@ -41,6 +41,11 @@ class Mission {
     this.abortReason = data.abortReason || null;
     this.isCompleted = data.isCompleted || false;
     this.queueEnteredTime = data.queueEnteredTime ?? null;
+    this.retryCount = Number(data.retryCount || 0);
+    this.waitingReason = data.waitingReason || null;
+    this.lastRetryTime = data.lastRetryTime ?? null;
+    this.dispatchedTime = data.dispatchedTime ?? null;
+    this.totalWaitingTime = Number(data.totalWaitingTime || 0);
   }
 
   assignAircraft(aircraftId) {
@@ -104,7 +109,16 @@ class Mission {
     return true;
   }
 
-  markReady() { this.status = MissionStatus.READY; }
+  markWaiting(reason, currentTime) {
+    this.status = MissionStatus.WAITING_FOR_RESOURCES;
+    this.waitingReason = reason || "RESOURCE_UNAVAILABLE";
+    this.retryCount += 1;
+    this.lastRetryTime = currentTime;
+  }
+  markReady() {
+    this.status = MissionStatus.READY;
+    this.waitingReason = null;
+  }
   start(startTime = new Date()) {
     this.status = MissionStatus.IN_PROGRESS;
     this.actualStartTime = startTime;
@@ -151,6 +165,12 @@ class Mission {
       remainingWeaponInventory: this.remainingWeaponInventory,
       abortReason: this.abortReason,
       isCompleted: this.isCompleted,
+      queueEnteredTime: this.queueEnteredTime,
+      retryCount: this.retryCount,
+      waitingReason: this.waitingReason,
+      lastRetryTime: this.lastRetryTime,
+      dispatchedTime: this.dispatchedTime,
+      totalWaitingTime: this.totalWaitingTime,
     };
   }
 }

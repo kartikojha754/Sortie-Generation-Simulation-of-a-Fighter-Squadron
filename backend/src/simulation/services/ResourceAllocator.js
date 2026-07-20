@@ -10,87 +10,110 @@ const RATING_WEIGHT = {
   [PilotRating.INSTRUCTOR]: 5,
 };
 
-/**
- * Allocates squadron resources to missions.
- */
 class ResourceAllocator {
-  allocateResources(mission, squadron) {
-    const aircraft = squadron.getAvailableAircraft()[0];
-
-    const pilot = this.findQualifiedPilot(
+  getAvailability(mission, squadron) {
+    const requiredCount = Math.max(1, Number(mission.requiredAircraftCount || 1));
+    const availableAircraft = squadron.getAvailableAircraft();
+    const qualifiedPilots = this.findQualifiedPilots(
       mission,
       squadron.getAvailablePilots(),
+      requiredCount,
     );
+    const availableGroundCrew = squadron.getAvailableGroundCrew();
+    const availableRunways = squadron.getAvailableRunways();
 
+    const missing = [];
+
+    if (availableAircraft.length < requiredCount) missing.push("AIRCRAFT");
+    if (qualifiedPilots.length < requiredCount) missing.push("QUALIFIED_PILOT");
+    if (availableGroundCrew.length < requiredCount) missing.push("GROUND_CREW");
+    if (availableRunways.length < 1) missing.push("RUNWAY");
+
+    return {
+      success: missing.length === 0,
+      reason: missing.length ? `WAITING_FOR_${missing.join("_AND_")}` : null,
+      missing,
+      requiredCount,
+      available: {
+        aircraft: availableAircraft.length,
+        qualifiedPilots: qualifiedPilots.length,
+        groundCrew: availableGroundCrew.length,
+        runways: availableRunways.length,
+      },
+    };
+  }
+
+  allocateResources(mission, squadron) {
+    const availability = this.getAvailability(mission, squadron);
+    if (!availability.success) return availability;
+
+    const requiredCount = availability.requiredCount;
+    const aircraft = squadron.getAvailableAircraft().slice(0, requiredCount);
+    const pilots = this.findQualifiedPilots(
+      mission,
+      squadron.getAvailablePilots(),
+      requiredCount,
+    );
+    const groundCrew = squadron.getAvailableGroundCrew().slice(0, requiredCount);
     const runway = squadron.getAvailableRunways()[0];
-    const groundCrew = squadron.getAvailableGroundCrew()[0];
 
-    if (!aircraft || !pilot || !runway || !groundCrew) {
-      return false;
-    }
+    aircraft.forEach((item, index) => {
+      const pilot = pilots[index];
+      const crew = groundCrew[index];
 
-    aircraft.assignMission(mission.id);
-    aircraft.assignPilot(pilot.id);
+      item.assignMission(mission.id);
+      item.assignPilot(pilot.id);
+      pilot.assignMission(mission.id);
+      pilot.assignAircraft(item.id);
+      crew.assignAircraft(item.id);
+      crew.assignMission(mission.id);
 
-    pilot.assignMission(mission.id);
-    pilot.assignAircraft(aircraft.id);
+      mission.assignAircraft(item.id);
+      mission.assignPilot(pilot.id);
+      mission.assignGroundCrew(crew.id);
+    });
 
-    runway.occupy(mission.id, aircraft.id);
-
-    groundCrew.assignAircraft(aircraft.id);
-    groundCrew.assignMission(mission.id);
-
-    mission.assignAircraft(aircraft.id);
-    mission.assignPilot(pilot.id);
+    runway.occupy(mission.id, aircraft[0].id);
     mission.assignRunway(runway.id);
-    mission.assignGroundCrew(groundCrew.id);
     mission.markReady();
 
-    return true;
+    return {
+      success: true,
+      reason: null,
+      aircraftIds: aircraft.map((item) => item.id),
+      pilotIds: pilots.map((item) => item.id),
+      groundCrewIds: groundCrew.map((item) => item.id),
+      runwayId: runway.id,
+    };
   }
 
   canEverAssignMission(mission, squadron) {
-    const hasAircraft = squadron.aircraft.length > 0;
+    const requiredCount = Math.max(1, Number(mission.requiredAircraftCount || 1));
+    const hasAircraft = squadron.aircraft.length >= requiredCount;
     const hasRunway = squadron.runways.length > 0;
-    const hasGroundCrew = squadron.groundCrew.length > 0;
+    const hasGroundCrew = squadron.groundCrew.length >= requiredCount;
+    const hasQualifiedPilots =
+      this.findQualifiedPilots(mission, squadron.pilots, requiredCount).length >=
+      requiredCount;
 
-    const requiredRating = mission.requiredPilotRating || PilotRating.WINGMAN;
-    const requiredWeight = RATING_WEIGHT[requiredRating] || 1;
-
-    const hasQualifiedPilot = squadron.pilots.some((pilot) => {
-      const pilotWeight = RATING_WEIGHT[pilot.rating] || 1;
-      return pilotWeight >= requiredWeight;
-    });
-
-    return hasAircraft && hasRunway && hasGroundCrew && hasQualifiedPilot;
+    return hasAircraft && hasRunway && hasGroundCrew && hasQualifiedPilots;
   }
 
   canAssignNow(mission, squadron) {
-    const aircraft = squadron.getAvailableAircraft()[0];
-
-    const pilot = this.findQualifiedPilot(
-      mission,
-      squadron.getAvailablePilots(),
-    );
-
-    const runway = squadron.getAvailableRunways()[0];
-    const groundCrew = squadron.getAvailableGroundCrew()[0];
-
-    return Boolean(aircraft && pilot && runway && groundCrew);
+    return this.getAvailability(mission, squadron).success;
   }
 
-  findQualifiedPilot(mission, availablePilots) {
+  findQualifiedPilots(mission, pilots, count) {
     const requiredRating = mission.requiredPilotRating || PilotRating.WINGMAN;
     const requiredWeight = RATING_WEIGHT[requiredRating] || 1;
 
-    return availablePilots
-      .filter((pilot) => {
-        const pilotWeight = RATING_WEIGHT[pilot.rating] || 1;
-        return pilotWeight >= requiredWeight;
-      })
-      .sort((a, b) => {
-        return (RATING_WEIGHT[a.rating] || 1) - (RATING_WEIGHT[b.rating] || 1);
-      })[0];
+    return pilots
+      .filter((pilot) => (RATING_WEIGHT[pilot.rating] || 1) >= requiredWeight)
+      .sort(
+        (a, b) =>
+          (RATING_WEIGHT[a.rating] || 1) - (RATING_WEIGHT[b.rating] || 1),
+      )
+      .slice(0, count);
   }
 }
 

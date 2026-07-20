@@ -46,6 +46,7 @@ function createCustomScenario(input = {}) {
   const squadron = new Squadron({
     id: input.squadronId || "SQ-CUSTOM",
     name: input.squadronName || "Custom Fighter Squadron",
+    weaponInventory: input.weaponInventory || {},
   });
 
   for (let i = 1; i <= aircraftCount; i++) {

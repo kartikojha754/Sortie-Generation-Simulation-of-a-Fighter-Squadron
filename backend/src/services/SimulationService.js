@@ -6,6 +6,8 @@ const {
   AbortHandler,
   MaintenanceScheduler,
   StatisticsCollector,
+  WeaponInventoryManager,
+  PendingMissionQueue,
 } = require("../simulation");
 
 const { entities, enums, constants } = require("../domain");
@@ -31,7 +33,7 @@ class SimulationService {
 
     this.sorties = [];
     this.maintenanceRecords = [];
-    this.pendingMissions = [];
+    this.pendingMissions = new PendingMissionQueue();
     this.schedulerLog = [];
   }
 
@@ -40,13 +42,17 @@ class SimulationService {
 
     this.sorties = [];
     this.maintenanceRecords = [];
-    this.pendingMissions = [];
+    this.pendingMissions = new PendingMissionQueue();
     this.schedulerLog = [];
     this.statisticsCollector = new StatisticsCollector();
 
     const engine = new SimulationEngine();
 
     const missions = this.missionPlanner.createMissions(missionCount, scenario);
+    const weaponInventoryManager = new WeaponInventoryManager(
+      scenario.weaponInventory || squadron.weaponInventory || {},
+    );
+    squadron.weaponInventory = weaponInventoryManager.getRemaining();
 
     const context = {
       engine,
@@ -55,9 +61,10 @@ class SimulationService {
       missions,
       sorties: this.sorties,
       maintenanceRecords: this.maintenanceRecords,
-      pendingMissions: this.pendingMissions,
+      pendingMissionQueue: this.pendingMissions,
       schedulerLog: this.schedulerLog,
       statisticsCollector: this.statisticsCollector,
+      weaponInventoryManager,
     };
 
     this.registerHandlers(engine, context);
@@ -76,6 +83,8 @@ class SimulationService {
     engine.run(context);
 
     this.abortUnscheduledMissions(context);
+    squadron.weaponInventory = weaponInventoryManager.getRemaining();
+    squadron.weaponInventorySummary = weaponInventoryManager.getReport();
 
     return {
       scenario: scenario.toJSON(),
@@ -86,6 +95,8 @@ class SimulationService {
         .map((s) => s.toJSON()),
       maintenanceRecords: this.maintenanceRecords.map((m) => m.toJSON()),
       schedulerLog: this.schedulerLog,
+      pendingMissionQueue: this.pendingMissions.toJSON(),
+      weaponInventorySummary: weaponInventoryManager.getReport(),
       finalSquadronState: squadron.toJSON(),
     };
   }
@@ -116,7 +127,7 @@ class SimulationService {
       mission.status = MissionStatus.WAITING_FOR_RESOURCES;
       mission.queueEnteredTime = event.time;
 
-      context.pendingMissions.push(mission);
+      context.pendingMissionQueue.enqueue(mission, event.time);
 
       this.log(context, {
         time: event.time,
@@ -150,17 +161,16 @@ class SimulationService {
       const mission = this.findMission(context.missions, event.entityId);
       if (!mission || mission.status === MissionStatus.ABORTED) return;
 
-      const aircraft = this.findById(
-        context.squadron.aircraft,
-        mission.aircraftIds[0],
-      );
-
-      const pilot = this.findById(context.squadron.pilots, mission.pilotIds[0]);
-
+      const aircraftList = mission.aircraftIds
+        .map((id) => this.findById(context.squadron.aircraft, id))
+        .filter(Boolean);
+      const pilotList = mission.pilotIds
+        .map((id) => this.findById(context.squadron.pilots, id))
+        .filter(Boolean);
       const runway = this.findById(context.squadron.runways, mission.runwayId);
 
-      if (aircraft) aircraft.startFlight();
-      if (pilot) pilot.startFlight();
+      aircraftList.forEach((aircraft) => aircraft.startFlight());
+      pilotList.forEach((pilot) => pilot.startFlight());
       if (runway) runway.release();
 
       mission.start(event.time);
@@ -208,38 +218,35 @@ class SimulationService {
       const mission = this.findMission(context.missions, event.entityId);
       if (!mission) return;
 
-      const aircraft = this.findById(
-        context.squadron.aircraft,
-        mission.aircraftIds[0],
-      );
-
-      const pilot = this.findById(context.squadron.pilots, mission.pilotIds[0]);
+      const aircraftList = mission.aircraftIds
+        .map((id) => this.findById(context.squadron.aircraft, id))
+        .filter(Boolean);
+      const pilotList = mission.pilotIds
+        .map((id) => this.findById(context.squadron.pilots, id))
+        .filter(Boolean);
 
       const sortie = this.findById(context.sorties, event.payload.sortieId);
 
       const missionDuration =
         mission.duration || SimulationConstants.DEFAULT_SORTIE_DURATION;
 
-      if (aircraft) {
+      aircraftList.forEach((aircraft) => {
         aircraft.land();
         aircraft.addFlightHours(missionDuration / 60);
-      }
+      });
 
-      if (pilot) {
+      pilotList.forEach((pilot) => {
         pilot.completeFlight(missionDuration / 60);
         pilot.release();
-
         engine.scheduleEvent(
           EventFactory.createEvent({
             type: EventType.PILOT_REST_COMPLETED,
             time: event.time + SimulationConstants.MIN_REST_TIME_AFTER_SORTIE,
             entityId: pilot.id,
-            payload: {
-              pilotId: pilot.id,
-            },
+            payload: { pilotId: pilot.id },
           }),
         );
-      }
+      });
 
       if (sortie) {
         sortie.recordLanding(event.time);
@@ -262,16 +269,14 @@ class SimulationService {
         sortieId: sortie?.id,
       });
 
-      if (aircraft) {
+      aircraftList.forEach((aircraft) => {
         const maintenanceResult = this.maintenanceScheduler.scheduleMaintenance(
           aircraft,
           event.time,
         );
-
         context.maintenanceRecords.push(maintenanceResult.maintenance);
-
         engine.scheduleEvent(maintenanceResult.completionEvent);
-      }
+      });
 
       this.tryDispatchPendingMissions(context, event.time);
     });
@@ -330,11 +335,65 @@ class SimulationService {
 
     while (dispatchedSomething) {
       dispatchedSomething = false;
+      const pendingMissions = context.pendingMissionQueue.getAll();
 
-      this.sortPendingMissions(context.pendingMissions);
+      for (const mission of pendingMissions) {
+        if (mission.type === "AIR_TO_GROUND") {
+          const availableAircraftCount = Math.min(
+            context.squadron.getAvailableAircraft().length,
+            Number(
+              context.scenario.maxStrikeAircraft ||
+                context.squadron.aircraft.length ||
+                1,
+            ),
+          );
 
-      for (let i = 0; i < context.pendingMissions.length; i++) {
-        const mission = context.pendingMissions[i];
+          if (availableAircraftCount < 1) {
+            this.markMissionWaiting(
+              mission,
+              context,
+              currentTime,
+              "WAITING_FOR_AIRCRAFT",
+            );
+            continue;
+          }
+
+          const planningResult = this.missionPlanner.planAirToGroundMission(
+            mission,
+            context.scenario,
+            context.weaponInventoryManager.getRemaining(),
+            availableAircraftCount,
+          );
+
+          if (!planningResult.success || !planningResult.bestPlan) {
+            mission.strikePlanningSummary = {
+              failureReason:
+                planningResult.failureReason || "NO_VALID_WEAPON_COMBINATION",
+              generatedPlanCount: planningResult.generatedPlanCount || 0,
+              validPlanCount: planningResult.validPlanCount || 0,
+              results: planningResult.results || [],
+            };
+
+            this.markMissionWaiting(
+              mission,
+              context,
+              currentTime,
+              "WAITING_FOR_WEAPON_INVENTORY",
+              {
+                remainingWeaponInventory:
+                  context.weaponInventoryManager.getRemaining(),
+              },
+            );
+            continue;
+          }
+
+          mission.weaponInventory =
+            context.weaponInventoryManager.getRemaining();
+          mission.applyStrikePlan(planningResult);
+          mission.weaponUsage = {
+            ...(planningResult.bestPlan.weaponUsage || {}),
+          };
+        }
 
         if (
           !this.resourceAllocator.canEverAssignMission(
@@ -344,43 +403,85 @@ class SimulationService {
         ) {
           mission.abort("RESOURCE_UNAVAILABLE");
           context.statisticsCollector.recordAbort("RESOURCE_UNAVAILABLE");
-
-          context.pendingMissions.splice(i, 1);
-          i--;
+          context.pendingMissionQueue.remove(mission.id);
 
           this.log(context, {
             time: currentTime,
             type: "MISSION_ABORTED_PERMANENT_RESOURCE_GAP",
             missionId: mission.id,
           });
-
           continue;
         }
 
-        if (!this.resourceAllocator.canAssignNow(mission, context.squadron)) {
-          this.log(context, {
-            time: currentTime,
-            type: "MISSION_WAITING_FOR_RESOURCES",
-            missionId: mission.id,
-            reason: "Resources are busy, resting, or under maintenance.",
-          });
-
-          continue;
-        }
-
-        const allocated = this.resourceAllocator.allocateResources(
+        const availability = this.resourceAllocator.getAvailability(
           mission,
           context.squadron,
         );
 
-        if (!allocated) {
+        if (!availability.success) {
+          this.markMissionWaiting(
+            mission,
+            context,
+            currentTime,
+            availability.reason,
+            { availability: availability.available },
+          );
           continue;
         }
 
-        context.pendingMissions.splice(i, 1);
+        const allocation = this.resourceAllocator.allocateResources(
+          mission,
+          context.squadron,
+        );
+
+        if (!allocation.success) {
+          this.markMissionWaiting(
+            mission,
+            context,
+            currentTime,
+            allocation.reason || "WAITING_FOR_RESOURCES",
+          );
+          continue;
+        }
+
+        if (mission.type === "AIR_TO_GROUND") {
+          const consumed = context.weaponInventoryManager.consume(
+            mission.id,
+            mission.weaponUsage,
+            currentTime,
+          );
+
+          if (!consumed) {
+            this.releaseMissionResources(mission, context.squadron);
+            this.clearMissionAssignments(mission);
+            this.markMissionWaiting(
+              mission,
+              context,
+              currentTime,
+              "WAITING_FOR_WEAPON_INVENTORY",
+            );
+            continue;
+          }
+
+          mission.remainingWeaponInventory =
+            context.weaponInventoryManager.getRemaining();
+          context.squadron.weaponInventory =
+            mission.remainingWeaponInventory;
+          context.squadron.weaponInventorySummary =
+            context.weaponInventoryManager.getReport();
+
+          this.log(context, {
+            time: currentTime,
+            type: "WEAPONS_CONSUMED",
+            missionId: mission.id,
+            weaponUsage: mission.weaponUsage,
+            remainingWeaponInventory: mission.remainingWeaponInventory,
+          });
+        }
+
+        context.pendingMissionQueue.remove(mission.id);
 
         const abortType = this.abortHandler.checkAbort(context.scenario);
-
         if (abortType) {
           mission.abort(abortType);
           context.statisticsCollector.recordAbort(abortType);
@@ -400,11 +501,17 @@ class SimulationService {
         const planningTime = context.scenario.missionPlanningEnabled
           ? SimulationConstants.DEFAULT_MISSION_PLANNING_TIME
           : 0;
-
         const waitingTime =
           currentTime - (mission.queueEnteredTime ?? mission.incomingTime);
 
         mission.scheduledStartTime = currentTime;
+        mission.dispatchedTime = currentTime;
+        mission.totalWaitingTime = waitingTime;
+        mission.waitingReason = null;
+        context.statisticsCollector.recordDispatch(
+          waitingTime,
+          mission.retryCount,
+        );
 
         this.log(context, {
           time: currentTime,
@@ -412,8 +519,9 @@ class SimulationService {
           missionId: mission.id,
           priority: mission.priority,
           waitingTime,
-          aircraftId: mission.aircraftIds[0],
-          pilotId: mission.pilotIds[0],
+          retryCount: mission.retryCount,
+          aircraftIds: mission.aircraftIds,
+          pilotIds: mission.pilotIds,
           runwayId: mission.runwayId,
         });
 
@@ -432,23 +540,32 @@ class SimulationService {
     }
   }
 
-  sortPendingMissions(pendingMissions) {
-    pendingMissions.sort((a, b) => {
-      const priorityDifference =
-        (PRIORITY_WEIGHT[b.priority] || 0) - (PRIORITY_WEIGHT[a.priority] || 0);
+  markMissionWaiting(
+    mission,
+    context,
+    currentTime,
+    reason,
+    extraLogData = {},
+  ) {
+    const repeatedAtSameTime = mission.lastRetryTime === currentTime;
+    if (!repeatedAtSameTime || mission.waitingReason !== reason) {
+      mission.markWaiting(reason, currentTime);
+      context.statisticsCollector.recordWait(reason);
+    }
 
-      if (priorityDifference !== 0) return priorityDifference;
-
-      const incomingDifference = (a.incomingTime || 0) - (b.incomingTime || 0);
-
-      if (incomingDifference !== 0) return incomingDifference;
-
-      return (a.duration || 0) - (b.duration || 0);
+    this.log(context, {
+      time: currentTime,
+      type: "MISSION_WAITING_FOR_RESOURCES",
+      missionId: mission.id,
+      priority: mission.priority,
+      reason,
+      retryCount: mission.retryCount,
+      ...extraLogData,
     });
   }
 
   abortUnscheduledMissions(context) {
-    context.pendingMissions.forEach((mission) => {
+    context.pendingMissionQueue.getAll().forEach((mission) => {
       mission.abort("SIMULATION_ENDED_BEFORE_RESOURCES_AVAILABLE");
       context.statisticsCollector.recordAbort(
         "SIMULATION_ENDED_BEFORE_RESOURCES_AVAILABLE",
@@ -458,10 +575,19 @@ class SimulationService {
         time: context.engine.getCurrentTime(),
         type: "MISSION_ABORTED_SIMULATION_ENDED",
         missionId: mission.id,
+        waitingReason: mission.waitingReason,
+        retryCount: mission.retryCount,
       });
     });
 
-    context.pendingMissions.length = 0;
+    context.pendingMissionQueue.clear();
+  }
+
+  clearMissionAssignments(mission) {
+    mission.aircraftIds = [];
+    mission.pilotIds = [];
+    mission.groundCrewIds = [];
+    mission.runwayId = null;
   }
 
   createSortieFromMission(mission, takeoffTime) {

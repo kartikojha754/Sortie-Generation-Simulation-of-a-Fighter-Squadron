@@ -9,6 +9,7 @@ import PilotStatusCards from "../components/simulation/PilotStatusCards";
 import GroundCrewStatusCards from "../components/simulation/GroundCrewStatusCards";
 import SortieTable from "../components/simulation/SortieTable";
 import ScenarioSummary from "../components/simulation/ScenarioSummary";
+import WeaponInventorySummary from "../components/simulation/WeaponInventorySummary";
 import { useSimulation } from "../context/SimulationContext";
 
 export default function Simulation() {
